@@ -1,0 +1,103 @@
+/* PAGE CONTAINER */
+.about-page {
+  padding: 30px;
+  font-family: "Inter", sans-serif;
+}
+
+/* PAGE HEADER */
+.about-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.about-header h1 {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+  color: #3f6652;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #4f7a62;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* MISSION BOX */
+.mission-box {
+  background: linear-gradient(135deg, #6b9278, #4f7a62);
+  color: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.mission-box h2 {
+  margin-top: 0;
+}
+
+/* GENERIC SECTIONS */
+.about-section {
+  margin-bottom: 40px;
+}
+
+.about-section h2 {
+  color: #3f6652;
+}
+
+/* VALUES SECTION */
+.values-section {
+  margin-bottom: 40px;
+}
+
+.values-section h2 {
+  color: #3f6652;
+  margin-bottom: 20px;
+}
+
+/* VALUES GRID — now a UL */
+.values-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+/* VALUE CARD — now an LI */
+.value-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-left: 8px solid #6b9278;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.value-card h3 {
+  margin-top: 0;
+  color: #3f6652;
+}
+
+/* CTA FOOTER */
+.cta-section {
+  text-align: center;
+  margin-top: 50px;
+  padding: 30px 20px;
+  background: #f7faf8;
+  border-radius: 18px;
+  border-left: 8px solid #6b9278;
+}
+
+.cta-section h2 {
+  margin-top: 0;
+  color: #3f6652;
+}

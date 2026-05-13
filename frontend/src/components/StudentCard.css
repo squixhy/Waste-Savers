@@ -1,0 +1,47 @@
+/* CARD CONTAINER */
+.student-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 8px solid #6b9278; /* Sage accent */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+
+.student-details p {
+  margin: 4px 0;
+}
+
+
+.updated-badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 10px;
+  background: #e8f3ee;
+  color: #3f6652;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  align-self: flex-start;
+}

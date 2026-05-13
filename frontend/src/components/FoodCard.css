@@ -1,0 +1,62 @@
+.food-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 8px solid #6b9278;
+  display: block; /* ensures the whole card is clickable */
+}
+
+.food-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.food-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.food-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.food-info {
+  padding: 20px;
+}
+
+
+.tags {
+  margin-top: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+
+.tag {
+  display: inline-block;
+  background: #e8f3ee;
+  color: #3f6652;
+  padding: 5px 10px;
+  border-radius: 8px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+
+.expiry-badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 10px;
+  background: #ffe4e4;
+  color: #b33a3a;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
