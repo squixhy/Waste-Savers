@@ -7,7 +7,6 @@ function UniAlerts() {
   return (
     <main className="alerts-container">
 
-      {/* Back Button */}
       <button className="back-button" onClick={() => navigate(-1)}>
         ← Go Back
       </button>

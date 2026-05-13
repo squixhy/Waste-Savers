@@ -1,7 +1,7 @@
 export const students = [
   {
     id: 1,
-    name: "Aiman",
+    name: "Lilly",
     accommodation: "West Downs",
     lastUpdated: "2026-05-10",
     course: "Software Engineering"

@@ -1,10 +1,9 @@
-/* PAGE CONTAINER */
 .alerts-container {
   padding: 30px;
   font-family: "Inter", sans-serif;
 }
 
-/* HEADER BANNER */
+
 .alerts-banner {
   background: linear-gradient(135deg, #6b9278, #4f7a62);
   padding: 35px;
@@ -19,14 +18,13 @@
   font-size: 2.2rem;
 }
 
-/* ALERTS GRID */
+
 .alerts-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 25px;
 }
 
-/* INDIVIDUAL ALERT CARD */
 .alert-card {
   background: #fff;
   padding: 25px;
@@ -47,7 +45,7 @@
   color: #3f6652;
 }
 
-/* BACK BUTTON */
+/* Back button */
 .back-button {
   display: inline-block;
   margin-bottom: 20px;

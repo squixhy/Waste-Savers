@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./StudentPortal.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { students } from "../data/students";
 import StudentCard from "../components/StudentCard";
 
@@ -9,6 +9,17 @@ function StudentPortal() {
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+
+  
+  const [alerts, setAlerts] = useState([]);
+
+  
+  useEffect(() => {
+    fetch("https://improved-fiesta-q7545vq5x9r7h4464-5000.app.github.dev/alerts")
+      .then((res) => res.json())
+      .then((data) => setAlerts(data))
+      .catch((err) => console.error("Error fetching alerts:", err));
+  }, []);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -24,32 +35,34 @@ function StudentPortal() {
   return (
     <main className="portal-container">
 
-      
       <button className="back-button" onClick={() => navigate(-1)}>
         ← Go Back
       </button>
 
-      
       <header className="portal-banner">
         <h1>Student Portal</h1>
         <p>Search, filter, and explore student information.</p>
       </header>
 
-      {/* University Food Alerts */}
+      {/* University food alerts */}
       <section className="uni-alert-card">
         <Link to="/uni-alerts" className="alert-link">
           <h2>University Food Alerts</h2>
           <p>See surplus food posted by university catering.</p>
 
           <ul className="alert-list">
-            <li>🥐 Free muffins at West Downs Café until 4pm</li>
-            <li>🥗 Discounted salads at SU Shop until 6pm</li>
-            <li>🍎 Free fruit basket in the Library foyer</li>
+            {alerts.length === 0 ? (
+              <li>Loading alerts...</li>
+            ) : (
+              alerts.map((alert) => (
+                <li key={alert.id}>{alert.title}</li>
+              ))
+            )}
           </ul>
         </Link>
       </section>
 
-      {/* Search and Filter Row */}            
+      
       <section className="controls-row">
         <input
           type="text"
@@ -71,7 +84,6 @@ function StudentPortal() {
         </select>
       </section>
 
-      
       <section className="student-grid">
         {filteredStudents.map((student) => (
           <StudentCard key={student.id} student={student} />
