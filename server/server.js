@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-connectDB();
+// connectDB();
 
 const app = express();
 app.use(cors());
@@ -13,6 +13,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+const alertsRoute = require('./routes/alerts');
+app.use('/alerts', alertsRoute);
+
+
+
+
+const PORT = 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
+

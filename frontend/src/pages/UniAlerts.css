@@ -1,0 +1,64 @@
+.alerts-container {
+  padding: 30px;
+  font-family: "Inter", sans-serif;
+}
+
+
+.alerts-banner {
+  background: linear-gradient(135deg, #6b9278, #4f7a62);
+  padding: 35px;
+  border-radius: 20px;
+  color: #fff;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.alerts-banner h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+
+.alerts-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.alert-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-left: 8px solid #6b9278;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alert-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  background: #f7faf8;
+}
+
+.alert-card h3 {
+  margin-top: 0;
+  color: #3f6652;
+}
+
+/* Back button */
+.back-button {
+  display: inline-block;
+  margin-bottom: 20px;
+  background: #6b9278;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.back-button:hover {
+  background: #4f7a62;
+}
