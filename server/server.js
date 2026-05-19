@@ -17,14 +17,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-const alertsRoute = require('./routes/alerts');
-app.use('/alerts', alertsRoute);
+const recipesRoute = require('./routes/recipes');
+app.use('/recipes', recipesRoute);
 
-
-
-
-const PORT = 5050;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
 });
+
+//Toby
+const foodDiaryRoute = require('./routes/FoodDiary');
+app.use('/food-diary', foodDiaryRoute);
