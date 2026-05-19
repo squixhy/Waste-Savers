@@ -7,6 +7,11 @@
   margin: auto;
 }
 
+.scroll-y {
+  overflow-y: scroll;
+  display: flex;
+  justify-content: center;
+}
 
 .welcome-banner {
   background: linear-gradient(135deg, #5a7f6a, #3f6652);
@@ -178,19 +183,48 @@
   width: -webkit-fill-available;
 }
 
-.food_diary-table {
-  width: 90%;
-  margin: auto;
-  height: fit-content;
-  display: grid;
-  grid-auto-columns: auto;
-  justify-content: center;
-  align-items: center;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: rgba(0, 0, 0, 0.1);
+.food-diary-wrapper {
+  padding: 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 30px auto;
+  max-width: 900px;
+  overflow-x: auto; /* handles small screens */
 }
 
-th, td{
-  border: 1px solid rgba(0, 0, 0);
+.food-diary-title {
+  font-size: 1.5rem;
+  color: #3f6652;
+  margin-bottom: 16px;
+}
+
+.food_diary-table {
+  width: auto;
+  border-collapse: collapse;
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+}
+
+.food_diary-table th {
+  background-color: #3f6652;
+  color: #fff;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.food_diary-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #e8ede9;
+  color: #333;
+}
+
+.food_diary-table tbody tr:nth-child(even) {
+  background-color: #f5f7f5;
+}
+
+.food_diary-table tbody tr:hover {
+  background-color: #e4ede7;
+  transition: background 0.2s ease;
 }
