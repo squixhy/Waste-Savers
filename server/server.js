@@ -3,10 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// connectDB();
+connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+      origin: '*'
+    }
+));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
@@ -19,9 +23,8 @@ app.use('/alerts', alertsRoute);
 
 
 
-const PORT = 5000;
+const PORT = 5050;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-

@@ -1,4 +1,4 @@
-import "./UniAlerts.css";
+import "../pages_css/UniAlerts.css";
 import { useNavigate } from "react-router-dom";
 
 function UniAlerts() {

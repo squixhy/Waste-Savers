@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import "./StudentPortal.css";
+import "../pages_css/StudentPortal.css";
 import { useState, useEffect } from "react";
-import { students } from "../data/students";
-import StudentCard from "../components/StudentCard";
+import { students } from "../../data/students";
+import StudentCard from "../../components/StudentCard";
 
 function StudentPortal() {
   const navigate = useNavigate();

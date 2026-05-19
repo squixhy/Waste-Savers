@@ -1,7 +1,15 @@
-import "./Homepage.css";
+import "../pages_css/Homepage.css";
 import { Link } from "react-router-dom";
 
 function Homepage() {
+
+  return(
+      <main className="Homepage">
+        <div style={'scroll'}>
+
+        </div>
+      </main>
+  )
 
   return (
     <main className="homepage-container">

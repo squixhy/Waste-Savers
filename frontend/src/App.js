@@ -1,9 +1,9 @@
 import Navbar from "./components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Homepage from "./pages/Homepage";
-import StudentPortal from "./pages/StudentPortal";
-import UniAlerts from "./pages/UniAlerts";
-import About from "./pages/About";
+import Homepage from "./pages/pages_js/Homepage";
+import StudentPortal from "./pages/pages_js/StudentPortal";
+import UniAlerts from "./pages/pages_js/UniAlerts";
+import About from "./pages/pages_js/About";
 
 function App() {
   return (
