@@ -26,6 +26,11 @@ function Homepage() {
               <td>2025-05-05</td>
               <td>165</td>
               <td>2</td>
+              <td>Chicken Breast</td>
+              <td>2025-05-01</td>
+              <td>2025-05-05</td>
+              <td>165</td>
+              <td>2</td>
             </tr>
             </tbody>
           </table>
