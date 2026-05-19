@@ -9,4 +9,4 @@ const ingredientScheme = new mongoose.Schema({
 });
 // Ingredients are sorted by name, dateAdded, expiryDate, calories, quantity. 
 
-module.exports = mongoose.model('Ingredients', ingredientScheme);
+module.exports = mongoose.models.Ingredients || mongoose.model('Ingredients', ingredientScheme);

@@ -79,7 +79,6 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "Merging feature/food-diary",
     "git.auto.fetch.suggestion.counter": "1",
     "javascript.preferred.runtime.type.id": "node",
     "last_opened_file_path": "/Users/tobydason-barber/WebstormProjects/Waste-Savers",
@@ -93,6 +92,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/frontend/src/components" />
       <recent name="$PROJECT_DIR$/frontend/src/pages/pages_js" />
       <recent name="$PROJECT_DIR$/frontend/src/pages/pages_css" />
     </key>
@@ -115,7 +115,7 @@
       <workItem from="1778250808765" duration="244000" />
       <workItem from="1779114879035" duration="2468000" />
       <workItem from="1779118011808" duration="8701000" />
-      <workItem from="1779197318204" duration="7459000" />
+      <workItem from="1779197318204" duration="10772000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <option name="closed" value="true" />

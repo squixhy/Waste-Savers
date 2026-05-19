@@ -20,10 +20,9 @@ app.get('/api/health', (req, res) => {
 const recipesRoute = require('./routes/recipes');
 app.use('/recipes', recipesRoute);
 
+const foodDiaryRoute = require('./routes/food');
+app.use('/food-diary', foodDiaryRoute);
+
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
-
-//Toby
-const foodDiaryRoute = require('./routes/FoodDiary');
-app.use('/food-diary', foodDiaryRoute);

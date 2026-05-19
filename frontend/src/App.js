@@ -1,6 +1,6 @@
 import Navbar from "./components/Navbar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import FoodDiary from "./pages/pages_js/FoodDiary";
+import HomePage from "./pages/pages_js/HomePage";
 import StudentPortal from "./pages/pages_js/StudentPortal";
 import UniAlerts from "./pages/pages_js/UniAlerts";
 import About from "./pages/pages_js/About";
@@ -12,7 +12,7 @@ function App() {
       <Navbar />
 
       <Routes>
-        <Route path="/" element={<FoodDiary />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/portal" element={<StudentPortal />} />
         <Route path="/uni-alerts" element={<UniAlerts />} />
         <Route path="/about" element={<About />} />
