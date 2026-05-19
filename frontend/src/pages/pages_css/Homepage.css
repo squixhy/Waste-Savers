@@ -2,7 +2,8 @@
 .homepage-container {
   padding: 30px;
   font-family: "Inter", sans-serif;
-  max-width: 1200px;
+  max-width: 100vw;
+  max-height: 100vh;
   margin: auto;
 }
 
@@ -170,4 +171,26 @@
 .contact-section address p {
   margin: 5px 0;
   font-size: 1.05rem;
+}
+
+.food-diary {
+  height: 60vh;
+  width: -webkit-fill-available;
+}
+
+.food_diary-table {
+  width: 90%;
+  margin: auto;
+  height: fit-content;
+  display: grid;
+  grid-auto-columns: auto;
+  justify-content: center;
+  align-items: center;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+th, td{
+  border: 1px solid rgba(0, 0, 0);
 }

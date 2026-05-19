@@ -4,6 +4,7 @@ import Homepage from "./pages/pages_js/Homepage";
 import StudentPortal from "./pages/pages_js/StudentPortal";
 import UniAlerts from "./pages/pages_js/UniAlerts";
 import About from "./pages/pages_js/About";
+import "./App.css"
 
 function App() {
   return (
