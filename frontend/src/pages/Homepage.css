@@ -143,7 +143,7 @@
 }
 
 .contact-section {
-  background: #2F5D62; /* deep teal, WCAG-safe with white text */
+  background: #2F5D62; /* deep teal is WCAG-safe with white text */
   color: #fff;
   padding: 50px 35px;
   border-radius: 20px;
@@ -164,7 +164,7 @@
 
 .contact-section address {
   margin-top: 20px;
-  font-style: normal; /* removes italic default */
+  font-style: normal; /* ths removes the italic default */
 }
 
 .contact-section address p {
