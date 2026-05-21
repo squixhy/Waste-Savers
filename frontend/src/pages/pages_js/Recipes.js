@@ -1,6 +1,7 @@
 import "../pages_css/Recipes.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify"; 
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5050";
 
@@ -183,7 +184,7 @@ function RecipeModal({ summary, detail, status, error, onClose }) {
             {detail.instructions ? (
               <div
                 className="instructions"
-                dangerouslySetInnerHTML={{ __html: detail.instructions }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(detail.instructions) }}
               />
             ) : (
               <p>No written instructions.</p>
