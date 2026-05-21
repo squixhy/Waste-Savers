@@ -7,9 +7,18 @@ function FoodDiary() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [mode, setMode] = useState(null);
     const [editingItem, setEditingItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [foodDiarySort, setFoodDiarySort] = useState({ key: null, direction: "asc" });
+    const [breakdownSort, setBreakdownSort] = useState({ key: null, direction: "asc" });
+    const [filters, setFilters] = useState({
+        name: "",
+        expiryDate: "",
+        calories: "",
+        quantity: "",
+    });
     const [newItem, setNewItem] = useState({
         name: "",
         expiryDate: "",
@@ -36,6 +45,41 @@ function FoodDiary() {
 
     const handleEditChange = (e) => {
         setEditingItem({ ...editingItem, [e.target.name]: e.target.value });
+    };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const toggleFoodDiarySort = (key) => {
+        setFoodDiarySort((prev) => ({
+            key,
+            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+        }));
+    };
+
+    const toggleBreakdownSort = (key) => {
+        setBreakdownSort((prev) => ({
+            key,
+            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+        }));
+    };
+
+    const getSortIcon = (sortState, key) => {
+        if (sortState.key !== key) return "↕";
+        return sortState.direction === "asc" ? "↑" : "↓";
+    };
+
+    const sortValues = (aValue, bValue, direction, type) => {
+        let result = 0;
+        if (type === "text") {
+            result = String(aValue || "").localeCompare(String(bValue || ""));
+        } else if (type === "date") {
+            result = new Date(aValue || 0) - new Date(bValue || 0);
+        } else {
+            result = Number(aValue || 0) - Number(bValue || 0);
+        }
+        return direction === "asc" ? result : -result;
     };
 
     const handleSubmit = () => {
@@ -109,6 +153,58 @@ function FoodDiary() {
         setShowForm(false);
     };
 
+    const filteredFoodItems = foodItems.filter((item) => {
+        const itemName = item.name?.toLowerCase() || "";
+        const itemExpiryDate = item.expiryDate ? item.expiryDate.slice(0, 10) : "";
+        const itemCalories = item.calories?.toString() || "";
+        const itemQuantity = item.quantity?.toString() || "";
+
+        return (
+            itemName.includes(filters.name.toLowerCase()) &&
+            itemExpiryDate.includes(filters.expiryDate) &&
+            itemCalories.includes(filters.calories) &&
+            itemQuantity.includes(filters.quantity)
+        );
+    });
+
+    const sortedFoodItems = [...filteredFoodItems].sort((a, b) => {
+        if (!foodDiarySort.key) return 0;
+
+        const sortTypes = {
+            name: "text",
+            expiryDate: "date",
+            calories: "number",
+            quantity: "number",
+        };
+
+        return sortValues(
+            a[foodDiarySort.key],
+            b[foodDiarySort.key],
+            foodDiarySort.direction,
+            sortTypes[foodDiarySort.key]
+        );
+    });
+
+    const sortedBreakdownEntries = selectedItem?.entries
+        ? [...selectedItem.entries].sort((a, b) => {
+            if (!breakdownSort.key) return 0;
+
+            const sortTypes = {
+                dateAdded: "date",
+                expiryDate: "date",
+                calories: "number",
+                quantity: "number",
+            };
+
+            return sortValues(
+                a[breakdownSort.key],
+                b[breakdownSort.key],
+                breakdownSort.direction,
+                sortTypes[breakdownSort.key]
+            );
+        })
+        : [];
+
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -121,6 +217,9 @@ function FoodDiary() {
                 <button className={`add-btn ${mode === 'delete' ? 'active-mode-delete' : ''}`} onClick={() =>
                     toggleMode('delete')}>
                     Delete
+                </button>
+                <button className="add-btn" onClick={() => setShowFilters(!showFilters)}>
+                    {showFilters ? "Hide Filters" : "Show Filters"}
                 </button>
             </div>
 
@@ -147,15 +246,23 @@ function FoodDiary() {
                                 <table className="food_diary-table">
                                     <thead>
                                     <tr>
-                                        <th>Date Added</th>
-                                        <th>Expiry Date</th>
-                                        <th>Calories</th>
-                                        <th>Quantity</th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
+                                            Date Added {getSortIcon(breakdownSort, "dateAdded")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
+                                            Expiry Date {getSortIcon(breakdownSort, "expiryDate")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
+                                            Calories {getSortIcon(breakdownSort, "calories")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("quantity")}>
+                                            Quantity {getSortIcon(breakdownSort, "quantity")}
+                                        </th>
                                         <th></th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {selectedItem.entries.map((entry) => (
+                                    {sortedBreakdownEntries.map((entry) => (
                                         entry._id === editingItem._id ? (
                                             <tr key={entry._id}>
                                                 <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
@@ -193,15 +300,23 @@ function FoodDiary() {
                                 <table className="food_diary-table">
                                     <thead>
                                     <tr>
-                                        <th>Date Added</th>
-                                        <th>Expiry Date</th>
-                                        <th>Calories</th>
-                                        <th>Quantity</th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
+                                            Date Added {getSortIcon(breakdownSort, "dateAdded")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
+                                            Expiry Date {getSortIcon(breakdownSort, "expiryDate")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
+                                            Calories {getSortIcon(breakdownSort, "calories")}
+                                        </th>
+                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("quantity")}>
+                                            Quantity {getSortIcon(breakdownSort, "quantity")}
+                                        </th>
                                         <th></th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {selectedItem.entries.map((entry) => (
+                                    {sortedBreakdownEntries.map((entry) => (
                                         <tr key={entry._id}>
                                             <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
                                             <td>{entry.expiryDate ? new Date(entry.expiryDate).toLocaleDateString() : ""}</td>
@@ -231,29 +346,63 @@ function FoodDiary() {
                 </div>
             ) : (
                 <div className="panel">
+                    {showFilters && (
+                        <div className="filter-row">
+                            <input
+                                name="name"
+                                placeholder="Filter by food name"
+                                value={filters.name}
+                                onChange={handleFilterChange}
+                            />
+                            <input
+                                name="expiryDate"
+                                type="date"
+                                value={filters.expiryDate}
+                                onChange={handleFilterChange}
+                            />
+                            <input
+                                name="calories"
+                                type="number"
+                                placeholder="Filter by calories"
+                                value={filters.calories}
+                                onChange={handleFilterChange}
+                            />
+                            <input
+                                name="quantity"
+                                type="number"
+                                placeholder="Filter by quantity"
+                                value={filters.quantity}
+                                onChange={handleFilterChange}
+                            />
+                            <button onClick={() => setFilters({ name: "", expiryDate: "", calories: "", quantity: "" })}>
+                                Clear Filters
+                            </button>
+                        </div>
+                    )}
+
                     <div className="table-scroll">
                         <table className="food_diary-table">
                             <thead>
                             <tr>
-                                <th style={{ fontWeight: 'bold'}}>
-                                    Food Name
+                                <th className="sortable-heading" onClick={() => toggleFoodDiarySort("name")}>
+                                    Food Name {getSortIcon(foodDiarySort, "name")}
                                 </th>
-                                <th style={{ fontWeight: 'bold'}}>
-                                    Expiry Date
+                                <th className="sortable-heading" onClick={() => toggleFoodDiarySort("expiryDate")}>
+                                    Expiry Date {getSortIcon(foodDiarySort, "expiryDate")}
                                 </th>
-                                <th style={{ fontWeight: 'bold'}}>
-                                    Calories
+                                <th className="sortable-heading" onClick={() => toggleFoodDiarySort("calories")}>
+                                    Calories {getSortIcon(foodDiarySort, "calories")}
                                 </th>
-                                <th style={{ fontWeight: 'bold'}}>
-                                    Quantity
+                                <th className="sortable-heading" onClick={() => toggleFoodDiarySort("quantity")}>
+                                    Quantity {getSortIcon(foodDiarySort, "quantity")}
                                 </th>
                             </tr>
                             </thead>
                             <tbody>
-                            {foodItems.length === 0 ? (
+                            {sortedFoodItems.length === 0 ? (
                                 <tr><td colSpan="4">No food items found</td></tr>
                             ) : (
-                                foodItems.map((item) => (
+                                sortedFoodItems.map((item) => (
                                     <tr
                                         key={item._id}
                                         onClick={() => handleRowClick(item)}

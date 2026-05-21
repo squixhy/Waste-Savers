@@ -8,8 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_css/Homepage.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/Homepage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/controllers/fridgeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/fridgeController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +67,9 @@
     &quot;accountId&quot;: &quot;cc65cb53-b14f-4d5c-87a7-08867675dc8e&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3,
   &quot;fromUser&quot;: false
@@ -126,7 +127,7 @@
       <workItem from="1779118011808" duration="8701000" />
       <workItem from="1779197318204" duration="20592000" />
       <workItem from="1779364814261" duration="3840000" />
-      <workItem from="1779373423257" duration="7859000" />
+      <workItem from="1779373423257" duration="9229000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <option name="closed" value="true" />
@@ -192,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779375910174</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Added more inspection tools">
+      <option name="closed" value="true" />
+      <created>1779381458504</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1779381458504</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
