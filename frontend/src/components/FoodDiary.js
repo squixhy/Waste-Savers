@@ -1,4 +1,5 @@
 import '../pages/pages_css/Homepage.css'
+import '../pages/pages_css/FoodDiary.css'
 import { useState, useEffect } from "react";
 
 function FoodDiary() {
@@ -41,7 +42,6 @@ function FoodDiary() {
                 setFoodItems([...foodItems, saved]);
                 setShowForm(false);
                 setNewItem({ name: "", expiryDate: "", calories: "", quantity: "" });
-                // ← date_added removed from reset too
             })
             .catch(() => alert("Failed to add item"));
     };
@@ -49,7 +49,7 @@ function FoodDiary() {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div className="scroll-y">
+        <div className="scroll-y foodDiary-container">
             <button className="add-btn" onClick={() => setShowForm(!showForm)}>
                 + Add Food Item
             </button>
@@ -94,6 +94,7 @@ function FoodDiary() {
                 )}
                 </tbody>
             </table>
+
         </div>
     );
 }

@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="833573c4-950b-471e-85e8-ae80421c8d70" name="Changes" comment="Table" />
+    <list default="true" id="833573c4-950b-471e-85e8-ae80421c8d70" name="Changes" comment="Table">
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/PlannerBtn.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/components/RecipesBtn.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_css/Homepage.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/Homepage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_js/HomePage.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_js/HomePage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/models/ingredient.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/models/ingredient.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -74,11 +83,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "feature/food-diary",
     "git.auto.fetch.suggestion.counter": "1",
     "javascript.preferred.runtime.type.id": "node",
     "last_opened_file_path": "/Users/tobydason-barber/WebstormProjects/Waste-Savers",
@@ -87,6 +98,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -115,7 +127,8 @@
       <workItem from="1778250808765" duration="244000" />
       <workItem from="1779114879035" duration="2468000" />
       <workItem from="1779118011808" duration="8701000" />
-      <workItem from="1779197318204" duration="10772000" />
+      <workItem from="1779197318204" duration="20592000" />
+      <workItem from="1779364814261" duration="3840000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <option name="closed" value="true" />
@@ -190,7 +203,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/server/controllers/recipesController.js</url>
           <line>3</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
