@@ -6,7 +6,7 @@ async function getFoodDiary(req, res) {
 
         const grouped = {};
         ingredients.forEach((item) => {
-            const key = `${item.name}__${item.expiryDate}__${item.calories}`;
+            const key = item.name.toLowerCase();
             if (!grouped[key]) {
                 grouped[key] = {
                     _id: key,
@@ -21,8 +21,15 @@ async function getFoodDiary(req, res) {
             grouped[key].entries.push({
                 _id: item._id,
                 quantity: item.quantity,
+                calories: item.calories,
+                expiryDate: item.expiryDate,
                 dateAdded: item.dateAdded
             });
+
+            // keep the closest expiry date
+            if (!grouped[key].expiryDate || new Date(item.expiryDate) < new Date(grouped[key].expiryDate)) {
+                grouped[key].expiryDate = item.expiryDate;
+            }
         });
 
         const result = Object.values(grouped);
