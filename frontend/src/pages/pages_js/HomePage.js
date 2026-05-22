@@ -1,11 +1,16 @@
-import FoodDiary from "../../components/FoodDiary"; // adjust path if needed
+import FoodDiary from "../../components/FoodDiary";
+import PlannerBtn from "../../components/PlannerBtn";
+import RecipesBtn from "../../components/RecipesBtn"; // adjust path if needed
 
 function Homepage() {
     return (
         <main className="homepage-container">
-            {/* your existing homepage content */}
 
             <FoodDiary />  {/* ← add this wherever you want the table */}
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+                <PlannerBtn />
+                <RecipesBtn />
+            </div>
         </main>
     );
 }

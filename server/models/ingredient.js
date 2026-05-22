@@ -5,8 +5,10 @@ const ingredientScheme = new mongoose.Schema({
   dateAdded: { type: Date, default: Date.now },
   expiryDate: { type: Date },
   calories: { type: Number },
-  quantity: { type: Number }
+  quantity: { type: Number },
+  portions: Number,
+  portionSize: Number,
+  unit: String
 });
-
 
 module.exports = mongoose.models.Ingredients || mongoose.model('Ingredients', ingredientScheme);

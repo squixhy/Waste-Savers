@@ -1,0 +1,627 @@
+.foodDiary-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 70vh;
+    max-height: 70vh;
+    background-color: #ededed;
+    border-radius: 15px;
+    border: 0.2vh solid #3f6652;
+}
+
+.active-mode-delete{
+    background-color: #a1001d !important;
+    outline: 2px solid #fff;
+}
+
+.active-mode-edit{
+    background-color: #76aeff !important;
+    outline: 2px solid #fff;
+}
+
+.panel {
+    margin-top: 0;
+    background: #f5f7f5;
+    padding: 1.2vw;
+    box-shadow: 0 0.5vh 1.2vw rgba(0,0,0,0.1);
+    width: auto;
+    max-height: 55vh;
+    overflow: hidden;
+    border-radius: 0.8vw;
+}
+
+.panel h3 {
+    color: #3f6652;
+    margin-bottom: 1.2vh;
+}
+
+.panel button {
+    margin-top: 1.2vh;
+    padding: 0.8vh 1vw;
+    background: #3f6652;
+    color: #fff;
+    border: none;
+    border-radius: 0.5vw;
+    cursor: pointer;
+}
+
+.food-diary {
+    height: 60vh;
+    width: -webkit-fill-available;
+}
+
+.food-diary-wrapper {
+    padding: 1.2vw;
+    background: #fff;
+    border-radius: 1vw;
+    box-shadow: 0 0.5vh 1.2vw rgba(0,0,0,0.1);
+    margin: 3vh auto;
+    max-width: 60vw;
+    overflow-x: auto;
+}
+
+.filter-row {
+    display: flex;
+    gap: 0.6vw;
+    margin-bottom: 1.2vh;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-row input {
+    padding: 0.8vh;
+}
+
+.filter-row button {
+    padding: 0.8vh 0.8vw;
+}
+
+.food-diary-title {
+    font-size: 1.5rem;
+    color: #3f6652;
+    margin-bottom: 1.6vh;
+}
+
+.food_diary-table {
+    width: 65vw;
+    border-collapse: collapse;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    max-height: 50vh;
+    text-align: center;
+}
+
+.food_diary-table th {
+    background-color: #3f6652;
+    color: #fff;
+    padding: 1.2vh 1vw;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.food_diary-table td {
+    padding: 1.1vh 1vw;
+    border-bottom: 0.1vh solid #e8ede9;
+    color: #333;
+}
+
+.food_diary-table tbody tr:nth-child(even) {
+    background-color: #f5f7f5;
+}
+
+.food_diary-table tbody tr:hover {
+    background-color: #e4ede7;
+    transition: background 0.2s ease;
+}
+
+.sort-icon {
+    position: absolute;
+    margin-left: 6px;
+    width: 1em;
+    text-align: left;
+}
+
+.sortable-heading {
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.sortable-heading:hover {
+    text-decoration: underline;
+}
+
+.table-scroll {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.edit-food-name-row {
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+.edit-food-name-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4vh;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3f6652;
+}
+
+.edit-food-name-row input {
+    width: 20vw;
+    padding: 0.5vh 0.6vw;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.5vw;
+    font-size: 0.95rem;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.edit-food-name-row input:focus {
+    border-color: #3f6652;
+}
+
+.expiry-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3vw;
+    width: 100%;
+}
+
+.expiry-input-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.no-expiry-btn {
+    height: 3.2vh;
+    min-height: 3.2vh;
+    width: 2vw;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0.5vw;
+    background-color: #a1001d;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    line-height: 3.2vh;
+}
+
+.no-expiry-btn:hover {
+    background-color: #c00025;
+}
+
+.table-expiry-input-row .no-expiry-btn {
+    width: 1.8vw;
+}
+
+.food-form-field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 0.4vh;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3f6652;
+}
+
+.food-form-field input,
+.food-form-field select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.food-form-field span {
+    height: 1.8vh;
+    line-height: 1.8vh;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.food-form input,
+.food-form select {
+    padding: 0.5vh 0.6vw;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.5vw;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border 0.2s ease;
+    height: 3.2vh;
+    min-height: 3.2vh;
+}
+
+.food-form {
+    background: #f5f7f5;
+    padding: 0.8vh 1vw;
+    border-radius: 1vw 1vw 0 0;
+    box-shadow: 0 0.5vh 1.2vw rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 0.6vw;
+    margin-bottom: 0;
+    width: 70vw;
+    max-height: 10vh;
+    overflow: visible;
+    transform-origin: bottom;
+}
+
+.food-form-slot {
+    height: 10vh;
+    margin-bottom: 1vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+}
+
+.filter-form.food-form-opening {
+    animation: slideFilterFormUp 0.25s ease-out forwards;
+}
+
+.filter-form.food-form-closing {
+    animation: slideFilterFormDown 0.25s ease-in forwards;
+}
+
+@keyframes slideFilterFormUp {
+    from {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideFilterFormDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+}
+
+.filter-form-breakdown.food-form-opening {
+    animation: slideFilterFormBreakdownUp 0.25s ease-out forwards !important;
+}
+
+.filter-form-breakdown.food-form-closing {
+    animation: slideFilterFormBreakdownDown 0.25s ease-in forwards !important;
+}
+
+@keyframes slideFilterFormBreakdownUp {
+    from {
+        opacity: 0;
+        transform: translateY(2vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-4vh);
+    }
+}
+
+@keyframes slideFilterFormBreakdownDown {
+    from {
+        opacity: 1;
+        transform: translateY(-8vh);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(2vh);
+    }
+}
+
+.hidden-control-btn {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.food-form-opening {
+    animation: slideAddFormUp 0.25s ease-out forwards;
+}
+
+.filter-form.food-form-opening {
+    animation: slideFilterFormUp 0.25s ease-out forwards;
+}
+
+.food-form-closing {
+    animation: slideAddFormDown 0.25s ease-in forwards;
+}
+
+@keyframes slideAddFormUp {
+    from {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideAddFormDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+}
+
+@keyframes deletePulse {
+    0% {
+        background-color: #fff0f0;
+    }
+    50% {
+        background-color: #ff9f9f;
+    }
+    100% {
+        background-color: #fff0f0;
+    }
+}
+
+.food_diary-table tbody tr.delete-mode-row:hover,
+.food_diary-table tbody tr.delete-mode-row:nth-child(even):hover {
+    animation: deletePulse 1.2s ease-in-out infinite;
+}
+
+.food-form > button {
+    align-self: flex-end;
+    height: 3.2vh;
+    min-height: 3.2vh;
+    padding: 0.5vh 0.8vw;
+    white-space: nowrap;
+}
+
+.food-form-field:nth-of-type(4) {
+    flex: 0 0 5vw;
+}
+
+.food-form-field:nth-of-type(5),
+.food-form-field:nth-of-type(6) {
+    flex: 1.1 1 0;
+}
+
+.expiry-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3vw;
+    width: 100%;
+}
+
+.expiry-input-row input {
+    width: 8vw;
+    min-width: 8vw;
+    max-width: 8vw;
+    height: 3.2vh;
+    box-sizing: border-box;
+}
+
+.panel .no-expiry-btn,
+.food-form .no-expiry-btn,
+.no-expiry-btn {
+    width: 2vw;
+    min-width: 2vw;
+    max-width: 2vw;
+    height: 3.2vh;
+    min-height: 3.2vh;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: #a1001d;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    line-height: 3.2vh;
+    text-align: center;
+}
+
+.panel .no-expiry-btn:hover,
+.food-form .no-expiry-btn:hover,
+.no-expiry-btn:hover {
+    background-color: #c00025;
+}
+
+.foodDiary-container input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    -webkit-appearance: none;
+}
+
+.foodDiary-container input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.hidden-no-expiry-btn {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.edit-entry-form {
+    background: #f5f7f5;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 0.6vw;
+    width: 20vw;
+    margin-bottom: 1vh;
+}
+
+.edit-entry-form .food-form-field {
+    flex: 1 1 0;
+}
+
+.edit-entry-form input,
+.food_diary-table tbody input,
+.food_diary-table tbody select {
+    padding: 0.5vh 0.6vw;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.5vw;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border 0.2s ease;
+    height: 3.2vh;
+    min-height: 3.2vh;
+    box-sizing: border-box;
+}
+
+.edit-entry-form input:focus,
+.food_diary-table tbody input:focus,
+.food_diary-table tbody select:focus {
+    border-color: #3f6652;
+}
+
+.food_diary-table tbody input,
+.food_diary-table tbody select {
+    width: 100%;
+}
+
+.table-expiry-input-row {
+    justify-content: center;
+}
+
+.filter-form .food-form-field,
+.filter-form .food-form-field:nth-of-type(4),
+.filter-form .food-form-field:nth-of-type(5),
+.filter-form .food-form-field:nth-of-type(6) {
+    flex: 1 1 0;
+}
+
+.breakdown-panel {
+    position: relative;
+    margin-top: -4vh;
+    padding-top: calc(1.2vw + 4vh);
+    overflow: visible;
+}
+
+.breakdown-panel-title {
+    position: absolute;
+    top: 1.2vw;
+    left: 1.2vw;
+    margin: 0;
+}
+.food_diary-table td.expiry-alert {
+    background-color: #a1001d;
+    color: #fff;
+    font-weight: 700;
+}
+
+.food_diary-table td.expiry-warning {
+    background-color: #d99a00;
+    color: #fff;
+    font-weight: 700;
+}
+
+.food_diary-table td.expiry-fine {
+    background-color: #00813d;
+    color: #fff;
+    font-weight: 700;
+}
+
+.foodDiary-controls {
+    display: flex;
+    gap: 0.6vw;
+    margin-bottom: 1.6vh;
+    width: 70vw;
+    align-items: flex-start;
+}
+
+.foodDiary-controls > .add-btn {
+    width: auto;
+    min-width: 10vw;
+}
+
+.settings-wrapper {
+    position: relative;
+    margin-left: auto;
+    padding-right: 1vw;
+    padding-top: 1vh;
+}
+
+.settings-btn {
+    width: 4vw;
+    height: 4vh;
+    padding: 0;
+    border: none;
+    border-radius: 0.5vw;
+    background-color: #3f6652;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.settings-btn:hover {
+    background-color: #5a7f6a;
+}
+
+.settings-pane {
+    position: absolute;
+    top: 5vh;
+    right: 1vw;
+    width: 20vw;
+    height: 20vh;
+    background-color: #f5f7f5;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.8vw;
+    box-shadow: 0 0.5vh 1.2vw rgba(0,0,0,0.1);
+    color: #3f6652;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    overflow: hidden;
+    transform-origin: top right;
+}
+
+.settings-pane-opening {
+    animation: settingsPaneOpen 0.25s ease-out forwards;
+}
+
+.settings-pane-closing {
+    animation: settingsPaneClose 0.25s ease-in forwards;
+}
+
+@keyframes settingsPaneOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes settingsPaneClose {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+}
