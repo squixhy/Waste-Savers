@@ -1,13 +1,11 @@
-// Tests for the Spoonacular service wrapper.
-// Place this file at:  server/__tests__/spoonacular.test.js
-// Adjust the require path below if your folder layout differs.
+
 
 const ORIGINAL_ENV = process.env;
 
 beforeEach(() => {
-  jest.resetModules();             // re-import the module fresh per test
+  jest.resetModules();             
   process.env = { ...ORIGINAL_ENV };
-  global.fetch = jest.fn();        // stub the global fetch (Node 18+)
+  global.fetch = jest.fn();       
 });
 
 afterEach(() => {
