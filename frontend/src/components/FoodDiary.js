@@ -11,8 +11,17 @@ function FoodDiary() {
     const [isClosingFilters, setIsClosingFilters] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [notificationSettings, setNotificationSettings] = useState({
+        high: { visible: true, colour: "#a1001d", days: 3 },
+        medium: { visible: true, colour: "#d99a00", days: 7 },
+        low: { visible: true, colour: "#00813d" },
+        none: { visible: true, colour: "#00813d" },
+    });
     const [isClosingSettings, setIsClosingSettings] = useState(false);
-    const settingsWrapperRef = useRef(null);    const [mode, setMode] = useState(null);
+    const settingsWrapperRef = useRef(null);
+    const [mode, setMode] = useState(null);
     const [editingItem, setEditingItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [foodDiarySort, setFoodDiarySort] = useState({ key: null, direction: "asc" });
@@ -283,32 +292,60 @@ function FoodDiary() {
         return new Date(expiryDate).toLocaleDateString();
     };
 
-    const getExpiryStatusClass = (expiryDate) => {
-        if (!expiryDate) return "";
-
+    const getExpiryStatusKey = (expiryDate) => {
+        if (!expiryDate) return "none";
         const dateOnly = expiryDate.slice(0, 10);
-
         if (dateOnly === noExpiryDateValue) {
-            return "expiry-fine";
+            return "none";
         }
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         const expiry = new Date(dateOnly);
         expiry.setHours(0, 0, 0, 0);
-
         const daysUntilExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-
-        if (daysUntilExpiry <= 3) {
-            return "expiry-alert";
+        if (daysUntilExpiry <= Number(notificationSettings.high.days)) {
+            return "high";
         }
-
-        if (daysUntilExpiry <= 7) {
-            return "expiry-warning";
+        if (daysUntilExpiry <= Number(notificationSettings.medium.days)) {
+            return "medium";
         }
+        return "low";
+    };
 
-        return "expiry-fine";
+    const getExpiryStatusStyle = (expiryDate) => {
+        if (!notificationsEnabled) {
+            return {};
+        }
+        const statusKey = getExpiryStatusKey(expiryDate);
+        const statusSettings = notificationSettings[statusKey];
+        if (!statusSettings?.visible) {
+            return {};
+        }
+        return {
+            backgroundColor: statusSettings.colour,
+            color: "#fff",
+            fontWeight: 700,
+        };
+    };
+
+    const handleNotificationSettingChange = (priority, field, value) => {
+        setNotificationSettings((prev) => ({
+            ...prev,
+            [priority]: {
+                ...prev[priority],
+                [field]: value,
+            },
+        }));
+    };
+
+    const resetNotificationSettings = () => {
+        setNotificationsEnabled(true);
+        setNotificationSettings({
+            high: { visible: true, colour: "#a1001d", days: 3 },
+            medium: { visible: true, colour: "#d99a00", days: 7 },
+            low: { visible: true, colour: "#00813d" },
+            none: { visible: true, colour: "#00813d" },
+        });
     };
 
     const formatTotalAmount = (amount, unit) => {
@@ -429,7 +466,11 @@ function FoodDiary() {
     };
 
     const handleEditChange = (e) => {
-        setEditingItem({ ...editingItem, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === "portionSize" && value !== "" && !isValidPortionSize(value)) {
+            return;
+        }
+        setEditingItem({ ...editingItem, [name]: value });
     };
 
     const handleFilterChange = (e) => {
@@ -487,7 +528,7 @@ function FoodDiary() {
         }
 
         if (!isValidPortionSize(newItem.portionSize)) {
-            alert("Portion size must be a whole number, .5, or .25 only");
+            alert("Portion size must be a whole number or up to 2 decimal places");
             return;
         }
 
@@ -574,6 +615,11 @@ function FoodDiary() {
             !editingItem.unit
         ) {
             alert("Please fill in all fields before saving changes");
+            return;
+        }
+
+        if (!isValidPortionSize(editingItem.portionSize.toString())) {
+            alert("Portion size must be a whole number or up to 2 decimal places");
             return;
         }
 
@@ -714,7 +760,104 @@ function FoodDiary() {
 
                     {showSettings && (
                         <div className={`settings-pane ${isClosingSettings ? "settings-pane-closing" : "settings-pane-opening"}`}>
-                            Settings
+                            <h3>Settings</h3>
+
+                            <button
+                                type="button"
+                                className="settings-menu-btn"
+                                onClick={() => setShowNotificationSettings((prev) => !prev)}
+                            >
+                                Notification Settings
+                            </button>
+
+                            {showNotificationSettings && (
+                                <div className="notification-settings-pane">
+                                    <label className="notification-off-row">
+                                        <span>Turn off Notifications</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={!notificationsEnabled}
+                                            onChange={(e) => setNotificationsEnabled(!e.target.checked)}
+                                        />
+                                    </label>
+                                    <div className="notification-setting-row">
+                                        <span>High</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={notificationSettings.high.visible}
+                                            onChange={(e) => handleNotificationSettingChange("high", "visible", e.target.checked)}
+                                        />
+                                        <input
+                                            type="color"
+                                            value={notificationSettings.high.colour}
+                                            onChange={(e) => handleNotificationSettingChange("high", "colour", e.target.value)}
+                                        />
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={notificationSettings.high.days}
+                                            onChange={(e) => handleNotificationSettingChange("high", "days", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="notification-setting-row">
+                                        <span>Medium</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={notificationSettings.medium.visible}
+                                            onChange={(e) => handleNotificationSettingChange("medium", "visible", e.target.checked)}
+                                        />
+                                        <input
+                                            type="color"
+                                            value={notificationSettings.medium.colour}
+                                            onChange={(e) => handleNotificationSettingChange("medium", "colour", e.target.value)}
+                                        />
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={notificationSettings.medium.days}
+                                            onChange={(e) => handleNotificationSettingChange("medium", "days", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="notification-setting-row">
+                                        <span>Low</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={notificationSettings.low.visible}
+                                            onChange={(e) => handleNotificationSettingChange("low", "visible", e.target.checked)}
+                                        />
+                                        <input
+                                            type="color"
+                                            value={notificationSettings.low.colour}
+                                            onChange={(e) => handleNotificationSettingChange("low", "colour", e.target.value)}
+                                        />
+                                        <div className="notification-days-placeholder"></div>
+                                    </div>
+
+                                    <div className="notification-setting-row">
+                                        <span>None</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={notificationSettings.none.visible}
+                                            onChange={(e) => handleNotificationSettingChange("none", "visible", e.target.checked)}
+                                        />
+                                        <input
+                                            type="color"
+                                            value={notificationSettings.none.colour}
+                                            onChange={(e) => handleNotificationSettingChange("none", "colour", e.target.value)}
+                                        />
+                                        <div className="notification-days-placeholder"></div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="reset-notification-settings-btn"
+                                        onClick={resetNotificationSettings}
+                                    >
+                                        Reset Notification Settings
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -978,7 +1121,7 @@ function FoodDiary() {
                                                 style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
                                             >
                                                 <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                                <td className={getExpiryStatusClass(entry.expiryDate)}>
+                                                <td style={getExpiryStatusStyle(entry.expiryDate)}>
                                                     {formatExpiryDate(entry.expiryDate)}
                                                 </td>                                                <td>{entry.calories}</td>
                                                 <td>{formatPortions(entry.portions)}</td>
@@ -1034,7 +1177,7 @@ function FoodDiary() {
                                             style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
                                         >
                                             <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                            <td className={getExpiryStatusClass(entry.expiryDate)}>
+                                            <td style={getExpiryStatusStyle(entry.expiryDate)}>
                                                 {formatExpiryDate(entry.expiryDate)}
                                             </td>                                            <td>{entry.calories}</td>
                                             <td>{formatPortions(entry.portions)}</td>
@@ -1118,7 +1261,7 @@ function FoodDiary() {
                                         <td>
                                             {formatTotalAmount(item.totalAmount, item.unit)}
                                         </td>
-                                        <td className={getExpiryStatusClass(item.expiryDate)}>
+                                        <td style={getExpiryStatusStyle(item.expiryDate)}>
                                             {formatExpiryDate(item.expiryDate)}
                                         </td>                                    </tr>
                                 ))

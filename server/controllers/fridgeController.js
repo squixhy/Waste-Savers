@@ -109,51 +109,192 @@ async function deleteFoodItem(req, res) {
     }
 }
 
-function findCaloriesNutrient(food) {
-    return food.foodNutrients?.find((nutrient) => {
-        const name = nutrient.name || nutrient.nutrientName || nutrient.nutrient?.name;
-        const unitName = nutrient.unitName || nutrient.nutrient?.unitName;
-        return name === "Energy" && unitName === "KCAL";
+let fatSecretAccessToken = null;
+let fatSecretTokenExpiry = 0;
+
+async function getFatSecretAccessToken() {
+    const clientId = process.env.FATSECRET_CLIENT_ID;
+    const clientSecret = process.env.FATSECRET_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+        throw new Error("FATSECRET_CLIENT_ID or FATSECRET_CLIENT_SECRET is missing. Add them to your backend .env file and restart the server.");
+    }
+
+    if (fatSecretAccessToken && Date.now() < fatSecretTokenExpiry) {
+        return fatSecretAccessToken;
+    }
+
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+    const tokenResponse = await fetch("https://oauth.fatsecret.com/connect/token", {
+        method: "POST",
+        headers: {
+            "Authorization": `Basic ${credentials}`,
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            grant_type: "client_credentials",
+            scope: "basic"
+        })
     });
+
+    if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        throw new Error(`FatSecret token request failed: ${tokenResponse.status} ${errorText}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    fatSecretAccessToken = tokenData.access_token;
+    fatSecretTokenExpiry = Date.now() + ((Number(tokenData.expires_in) || 86400) - 60) * 1000;
+
+    return fatSecretAccessToken;
 }
 
-function getNutrientAmount(nutrient) {
-    return nutrient?.amount || nutrient?.value || nutrient?.nutrient?.amount;
+async function callFatSecretApi(params) {
+    const accessToken = await getFatSecretAccessToken();
+
+    const response = await fetch("https://platform.fatsecret.com/rest/server.api", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            ...params,
+            format: "json"
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`FatSecret API request failed: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+        throw new Error(`FatSecret API error: ${data.error.message || JSON.stringify(data.error)}`);
+    }
+
+    return data;
 }
 
-function getRecommendedPortion(food, requestedUnit) {
-    const firstGramPortion = food.foodPortions?.find(
-        (portion) => portion.gramWeight && Number(portion.gramWeight) >= 25
+function normaliseToArray(value) {
+    if (!value) return [];
+    return Array.isArray(value) ? value : [value];
+}
+
+function getFatSecretFoods(searchData) {
+    return normaliseToArray(searchData.foods?.food || searchData.foods_search?.results?.food);
+}
+
+function getFatSecretServings(foodData) {
+    return normaliseToArray(foodData.food?.servings?.serving || foodData.food?.serving);
+}
+
+function getServingMetricAmount(serving) {
+    return Number(serving.metric_serving_amount || serving.metricServingAmount || 0);
+}
+
+function getServingMetricUnit(serving) {
+    return String(serving.metric_serving_unit || serving.metricServingUnit || "").toLowerCase().trim();
+}
+
+function normaliseServingUnit(unit) {
+    const normalisedUnit = String(unit || "").toLowerCase().trim();
+
+    if (["g", "gram", "grams"].includes(normalisedUnit)) {
+        return "g";
+    }
+
+    if (["ml", "millilitre", "milliliter", "millilitres", "milliliters"].includes(normalisedUnit)) {
+        return "ml";
+    }
+
+    if (["oz", "ounce", "ounces"].includes(normalisedUnit)) {
+        return "oz";
+    }
+
+    return normalisedUnit;
+}
+
+function selectBestServing(servings, requestedUnit) {
+    const normalisedRequestedUnit = requestedUnit === "ml" ? "ml" : "g";
+
+    const usableServings = servings.filter((serving) => {
+        const amount = getServingMetricAmount(serving);
+        const calories = Number(serving.calories);
+        return amount > 0 && !Number.isNaN(calories);
+    });
+
+    if (usableServings.length === 0) {
+        return null;
+    }
+
+    const exactUnitMatch = usableServings.filter((serving) =>
+        normaliseServingUnit(getServingMetricUnit(serving)) === normalisedRequestedUnit
     );
-    if (requestedUnit === "ml") {
-        return {
-            recommendedPortionSize: 250,
-            recommendedPortionUnit: "ml",
-            portionSource: "liquid fallback"
-        };
+
+    if (exactUnitMatch.length > 0) {
+        return exactUnitMatch.find((serving) => Number(serving.is_default) === 1) || exactUnitMatch[0];
     }
 
-    if (firstGramPortion) {
-        return {
-            recommendedPortionSize: Number(firstGramPortion.gramWeight),
-            recommendedPortionUnit: "g",
-            portionSource: firstGramPortion.portionDescription || "USDA foodPortions"
-        };
+    if (normalisedRequestedUnit === "ml") {
+        const gramServing = usableServings.find((serving) =>
+            normaliseServingUnit(getServingMetricUnit(serving)) === "g"
+        );
+
+        if (gramServing) {
+            return {
+                ...gramServing,
+                metric_serving_unit: "ml",
+                metric_serving_amount: getServingMetricAmount(gramServing)
+            };
+        }
     }
 
-    if (food.servingSize && food.servingSizeUnit?.toLowerCase() === "g") {
-        return {
-            recommendedPortionSize: Number(food.servingSize),
-            recommendedPortionUnit: "g",
-            portionSource: "USDA servingSize"
-        };
+    return usableServings.find((serving) => Number(serving.is_default) === 1) || usableServings[0];
+}
+
+async function getFatSecretFoodDetails(name, requestedUnit) {
+    const searchData = await callFatSecretApi({
+        method: "foods.search",
+        search_expression: name,
+        max_results: "5",
+        page_number: "0"
+    });
+
+    const foods = getFatSecretFoods(searchData);
+
+    if (foods.length === 0) {
+        return null;
     }
 
-    return {
-        recommendedPortionSize: 100,
-        recommendedPortionUnit: "g",
-        portionSource: "fallback"
-    };
+    for (const food of foods) {
+        const foodId = food.food_id || food.foodId;
+
+        if (!foodId) {
+            continue;
+        }
+
+        const foodData = await callFatSecretApi({
+            method: "food.get.v5",
+            food_id: foodId,
+            serving_amount_unit: requestedUnit
+        });
+
+        const servings = getFatSecretServings(foodData);
+        const selectedServing = selectBestServing(servings, requestedUnit);
+
+        if (selectedServing) {
+            return {
+                food: foodData.food,
+                serving: selectedServing
+            };
+        }
+    }
+
+    return null;
 }
 
 async function getCaloriesFromUsda(req, res) {
@@ -166,82 +307,51 @@ async function getCaloriesFromUsda(req, res) {
             });
         }
 
-        const apiKey = process.env.USDA_API_KEY;
+        const requestedUnit = String(unit).toLowerCase().trim();
 
-        if (!apiKey) {
-            return res.status(500).json({
-                error: "USDA_API_KEY is missing. Add it to your backend .env file and restart the server."
+        if (requestedUnit !== "g" && requestedUnit !== "ml") {
+            return res.status(400).json({
+                error: "Unit must be g or ml"
             });
         }
 
-        const searchUrl =
-            `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${apiKey}&query=${encodeURIComponent(name)}&dataType=Foundation,SR Legacy&pageSize=1`;
+        const fatSecretFood = await getFatSecretFoodDetails(name, requestedUnit);
 
-        const searchResponse = await fetch(searchUrl);
-
-        if (!searchResponse.ok) {
-            const errorText = await searchResponse.text();
-            return res.status(searchResponse.status).json({
-                error: "USDA API search request failed",
-                status: searchResponse.status,
-                details: errorText
+        if (!fatSecretFood) {
+            return res.status(404).json({
+                error: "Food or matching serving size not found in FatSecret"
             });
         }
 
-        const searchData = await searchResponse.json();
+        const { food, serving } = fatSecretFood;
+        const servingAmount = getServingMetricAmount(serving);
+        const servingUnit = getServingMetricUnit(serving);
+        const servingCalories = Number(serving.calories);
 
-        if (!searchData.foods || searchData.foods.length === 0) {
-            return res.status(404).json({ error: "Food not found" });
-        }
-
-        const searchFood = searchData.foods[0];
-
-        const detailsUrl =
-            `https://api.nal.usda.gov/fdc/v1/food/${searchFood.fdcId}?api_key=${apiKey}&format=full`;
-
-        const detailsResponse = await fetch(detailsUrl);
-
-        if (!detailsResponse.ok) {
-            const errorText = await detailsResponse.text();
-            return res.status(detailsResponse.status).json({
-                error: "USDA API food details request failed",
-                status: detailsResponse.status,
-                details: errorText
+        if (!servingAmount || Number.isNaN(servingCalories)) {
+            return res.status(404).json({
+                error: "Suitable FatSecret serving data not found for this unit"
             });
         }
 
-        const detailedFood = await detailsResponse.json();
-        const caloriesNutrient = findCaloriesNutrient(detailedFood) || findCaloriesNutrient(searchFood);
-
-        if (!caloriesNutrient) {
-            return res.status(404).json({ error: "Calories not found for this food" });
-        }
-
-        const caloriesPer100g = getNutrientAmount(caloriesNutrient);
-
-        if (!caloriesPer100g) {
-            return res.status(404).json({ error: "Calories amount not found for this food" });
-        }
-
-        const portion = getRecommendedPortion(detailedFood, unit);
-        const calories = (Number(caloriesPer100g) / 100) * Number(amount);
-        const caloriesPerRecommendedPortion =
-            (Number(caloriesPer100g) / 100) * Number(portion.recommendedPortionSize);
+        const caloriesPerUnit = servingCalories / servingAmount;
+        const caloriesPer100 = caloriesPerUnit * 100;
+        const totalCalories = caloriesPerUnit * Number(amount);
 
         res.json({
-            foodName: detailedFood.description || searchFood.description,
-            fdcId: detailedFood.fdcId || searchFood.fdcId,
+            foodName: food.food_name || food.foodName || name,
+            fatSecretFoodId: food.food_id || food.foodId,
             amount: Number(amount),
-            unit,
-            caloriesPer100g,
-            calories: Math.round(calories),
-            recommendedPortionSize: portion.recommendedPortionSize,
-            recommendedPortionUnit: portion.recommendedPortionUnit,
-            portionSource: portion.portionSource,
-            caloriesPerRecommendedPortion: Math.round(caloriesPerRecommendedPortion)
+            unit: requestedUnit,
+            caloriesPer100g: Number(caloriesPer100.toFixed(2)),
+            calories: Math.round(totalCalories),
+            recommendedPortionSize: Number(servingAmount.toFixed(2)),
+            recommendedPortionUnit: servingUnit,
+            portionSource: serving.measurement_description || "FatSecret serving",
+            caloriesPerRecommendedPortion: Math.round(servingCalories)
         });
     } catch (err) {
-        console.error("Failed to fetch calories from USDA:", err);
+        console.error("Failed to fetch calories from FatSecret:", err);
         res.status(500).json({ error: err.message });
     }
 }

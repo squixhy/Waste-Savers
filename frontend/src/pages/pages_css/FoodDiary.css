@@ -590,10 +590,15 @@
     color: #3f6652;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     z-index: 50;
-    overflow: hidden;
+    overflow-y: auto;
     transform-origin: top right;
+    min-height: 10vh;
+    flex-direction: column;
+    gap: 0.8vh;
+    padding: 1vh 0.8vw;
+    box-sizing: border-box;
 }
 
 .settings-pane-opening {
@@ -624,4 +629,89 @@
         opacity: 0;
         transform: scale(0.4);
     }
+}
+
+.settings-pane h3 {
+    margin: 0;
+    text-align: center;
+    font-size: 1rem;
+    color: #3f6652;
+}
+
+.settings-menu-btn {
+    height: 3vh;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: #3f6652;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.notification-settings-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vh;
+}
+
+.notification-setting-row {
+    display: grid;
+    grid-template-columns: 4vw 1.5vw 3vw 3vw;
+    align-items: center;
+    gap: 0.4vw;
+    font-size: 0.75rem;
+}
+
+.notification-setting-row input[type="checkbox"],
+.notification-off-row input[type="checkbox"] {
+    width: 1vw;
+    height: 1vw;
+    cursor: pointer;
+}
+
+.notification-setting-row input[type="color"] {
+    width: 3vw;
+    height: 2.5vh;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.notification-setting-row input[type="number"] {
+    width: 3vw;
+    height: 2.5vh;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.4vw;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.notification-days-placeholder {
+    width: 3vw;
+    height: 2.5vh;
+}
+
+.notification-off-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.6vh;
+    font-size: 0.75rem;
+}
+
+.reset-notification-settings-btn {
+    height: 3vh;
+    margin-top: 0.6vh;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: #a1001d;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.reset-notification-settings-btn:hover {
+    background-color: #c00025;
 }
