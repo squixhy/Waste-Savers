@@ -378,7 +378,6 @@ function FoodDiary() {
         setNewItem((prev) => {
             const updatedItem = { ...prev, [name]: value };
 
-            // Added: auto-calculate portions when totalWeight or portionSize changes and both are present
             if ((name === "totalWeight" || name === "portionSize") && updatedItem.totalWeight && updatedItem.portionSize) {
                 const calculatedPortions = Number(updatedItem.totalWeight) / Number(updatedItem.portionSize);
                 updatedItem.portions = calculatedPortions.toFixed(1);
@@ -661,7 +660,8 @@ function FoodDiary() {
     return (
         <div className="foodDiary-container">
             <div className="foodDiary-controls" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                <button className={`add-btn ${selectedItem ? "hidden-control-btn" : ""}`} onClick={() => {                    if (showForm) {
+                <button className={`add-btn ${selectedItem ? "hidden-control-btn" : ""}`} onClick={() => {
+                    if (showForm) {
                         cancelAddFood();
                     } else {
                         if (showFilters) {
@@ -741,7 +741,8 @@ function FoodDiary() {
                                     onClick={setNewItemNoExpiry}
                                 >
                                     X
-                                </button>                            </div>
+                                </button>
+                            </div>
                         </label>
 
                         <label className="food-form-field">
@@ -950,8 +951,10 @@ function FoodDiary() {
                                                             onClick={setEditingItemNoExpiry}
                                                         >
                                                             X
-                                                        </button>                                                    </div>
-                                                </td>                                                <td><input name="calories" type="number" onChange={handleEditChange} value={editingItem.calories} required /></td>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td><input name="calories" type="number" onChange={handleEditChange} value={editingItem.calories} required /></td>
                                                 <td><input name="portions" type="number" onChange={handleEditChange} value={editingItem.portions} required /></td>
                                                 <td><input name="portionSize" type="number" onChange={handleEditChange} value={editingItem.portionSize} required /></td>
                                                 <td>
@@ -1001,7 +1004,8 @@ function FoodDiary() {
                             </>
                         ) : (
                             <>
-                                <h3 className="breakdown-panel-title">{selectedItem.name}</h3>                                <table className="food_diary-table">
+                                <h3 className="breakdown-panel-title">{selectedItem.name}</h3>
+                                <table className="food_diary-table">
                                     <thead>
                                     <tr>
                                         <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>

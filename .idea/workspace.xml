@@ -7,8 +7,6 @@
     <list default="true" id="833573c4-950b-471e-85e8-ae80421c8d70" name="Changes" comment="Added sorting and filter">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/controllers/fridgeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/controllers/fridgeController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +126,7 @@
       <workItem from="1779118011808" duration="8701000" />
       <workItem from="1779197318204" duration="20592000" />
       <workItem from="1779364814261" duration="3840000" />
-      <workItem from="1779373423257" duration="33418000" />
+      <workItem from="1779373423257" duration="34571000" />
     </task>
     <task id="LOCAL-00001" summary="Start">
       <option name="closed" value="true" />
@@ -218,7 +216,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779410682564</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Added sorting and filter">
+      <option name="closed" value="true" />
+      <created>1779419483789</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1779419483789</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,6 +232,17 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Start" />
