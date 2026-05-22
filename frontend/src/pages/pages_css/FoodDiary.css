@@ -7,6 +7,9 @@
     width: 100%;
     height: 70vh;
     max-height: 70vh;
+    background-color: #ededed;
+    border-radius: 15px;
+    border: 0.2vh solid #3f6652;
 }
 
 .active-mode-delete{
@@ -262,10 +265,80 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    position: relative;
+}
+
+.filter-form.food-form-opening {
+    animation: slideFilterFormUp 0.25s ease-out forwards;
+}
+
+.filter-form.food-form-closing {
+    animation: slideFilterFormDown 0.25s ease-in forwards;
+}
+
+@keyframes slideFilterFormUp {
+    from {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideFilterFormDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(4vh);
+    }
+}
+
+.filter-form-breakdown.food-form-opening {
+    animation: slideFilterFormBreakdownUp 0.25s ease-out forwards !important;
+}
+
+.filter-form-breakdown.food-form-closing {
+    animation: slideFilterFormBreakdownDown 0.25s ease-in forwards !important;
+}
+
+@keyframes slideFilterFormBreakdownUp {
+    from {
+        opacity: 0;
+        transform: translateY(2vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-4vh);
+    }
+}
+
+@keyframes slideFilterFormBreakdownDown {
+    from {
+        opacity: 1;
+        transform: translateY(-8vh);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(2vh);
+    }
+}
+
+.hidden-control-btn {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .food-form-opening {
     animation: slideAddFormUp 0.25s ease-out forwards;
+}
+
+.filter-form.food-form-opening {
+    animation: slideFilterFormUp 0.25s ease-out forwards;
 }
 
 .food-form-closing {
@@ -435,4 +508,120 @@
 .filter-form .food-form-field:nth-of-type(5),
 .filter-form .food-form-field:nth-of-type(6) {
     flex: 1 1 0;
+}
+
+.breakdown-panel {
+    position: relative;
+    margin-top: -4vh;
+    padding-top: calc(1.2vw + 4vh);
+    overflow: visible;
+}
+
+.breakdown-panel-title {
+    position: absolute;
+    top: 1.2vw;
+    left: 1.2vw;
+    margin: 0;
+}
+.food_diary-table td.expiry-alert {
+    background-color: #a1001d;
+    color: #fff;
+    font-weight: 700;
+}
+
+.food_diary-table td.expiry-warning {
+    background-color: #d99a00;
+    color: #fff;
+    font-weight: 700;
+}
+
+.food_diary-table td.expiry-fine {
+    background-color: #00813d;
+    color: #fff;
+    font-weight: 700;
+}
+
+.foodDiary-controls {
+    display: flex;
+    gap: 0.6vw;
+    margin-bottom: 1.6vh;
+    width: 70vw;
+    align-items: flex-start;
+}
+
+.foodDiary-controls > .add-btn {
+    width: auto;
+    min-width: 10vw;
+}
+
+.settings-wrapper {
+    position: relative;
+    margin-left: auto;
+    padding-right: 1vw;
+    padding-top: 1vh;
+}
+
+.settings-btn {
+    width: 4vw;
+    height: 4vh;
+    padding: 0;
+    border: none;
+    border-radius: 0.5vw;
+    background-color: #3f6652;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.settings-btn:hover {
+    background-color: #5a7f6a;
+}
+
+.settings-pane {
+    position: absolute;
+    top: 5vh;
+    right: 1vw;
+    width: 20vw;
+    height: 20vh;
+    background-color: #f5f7f5;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.8vw;
+    box-shadow: 0 0.5vh 1.2vw rgba(0,0,0,0.1);
+    color: #3f6652;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    overflow: hidden;
+    transform-origin: top right;
+}
+
+.settings-pane-opening {
+    animation: settingsPaneOpen 0.25s ease-out forwards;
+}
+
+.settings-pane-closing {
+    animation: settingsPaneClose 0.25s ease-in forwards;
+}
+
+@keyframes settingsPaneOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes settingsPaneClose {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.4);
+    }
 }

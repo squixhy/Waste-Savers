@@ -1,6 +1,6 @@
 import '../pages/pages_css/Homepage.css'
 import '../pages/pages_css/FoodDiary.css'
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function FoodDiary() {
     const [foodItems, setFoodItems] = useState([]);
@@ -10,7 +10,9 @@ function FoodDiary() {
     const [isClosingForm, setIsClosingForm] = useState(false);
     const [isClosingFilters, setIsClosingFilters] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
-    const [mode, setMode] = useState(null);
+    const [showSettings, setShowSettings] = useState(false);
+    const [isClosingSettings, setIsClosingSettings] = useState(false);
+    const settingsWrapperRef = useRef(null);    const [mode, setMode] = useState(null);
     const [editingItem, setEditingItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [foodDiarySort, setFoodDiarySort] = useState({ key: null, direction: "asc" });
@@ -100,6 +102,24 @@ function FoodDiary() {
     });
 
     useEffect(() => {
+        const handleClickOutsideSettings = (e) => {
+            if (!showSettings || isClosingSettings) {
+                return;
+            }
+
+            if (settingsWrapperRef.current && !settingsWrapperRef.current.contains(e.target)) {
+                closeSettings();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutsideSettings);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutsideSettings);
+        };
+    }, [showSettings, isClosingSettings]);
+
+    useEffect(() => {
         if (!autoFillEnabled) {
             return;
         }
@@ -131,7 +151,11 @@ function FoodDiary() {
             .then((data) => {
                 setCaloriesPer100g(Number(data.caloriesPer100g) || null);
 
-                if (data.portionSource === "fallback" || !data.recommendedPortionSize) {
+                const shouldUseManualFallback =
+                    !data.recommendedPortionSize ||
+                    (data.portionSource === "fallback" && newItem.unit !== "ml");
+
+                if (shouldUseManualFallback) {
                     setManualPortionFallback(true);
 
                     setNewItem((prev) => ({
@@ -218,12 +242,25 @@ function FoodDiary() {
         }, 250);
     };
 
+    const closeSettings = () => {
+        if (!showSettings || isClosingSettings) {
+            return;
+        }
+
+        setIsClosingSettings(true);
+
+        setTimeout(() => {
+            setShowSettings(false);
+            setIsClosingSettings(false);
+        }, 250);
+    };
+
     const isIntegerValue = (value) => {
         return /^\d+$/.test(value);
     };
 
     const isValidPortionSize = (value) => {
-        return /^\d+(\.25|\.5)?$/.test(value);
+        return /^\d+(\.\d{1,2})?$/.test(value);
     };
 
     const blockDecimalKey = (e) => {
@@ -244,6 +281,55 @@ function FoodDiary() {
         }
 
         return new Date(expiryDate).toLocaleDateString();
+    };
+
+    const getExpiryStatusClass = (expiryDate) => {
+        if (!expiryDate) return "";
+
+        const dateOnly = expiryDate.slice(0, 10);
+
+        if (dateOnly === noExpiryDateValue) {
+            return "expiry-fine";
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const expiry = new Date(dateOnly);
+        expiry.setHours(0, 0, 0, 0);
+
+        const daysUntilExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+
+        if (daysUntilExpiry <= 3) {
+            return "expiry-alert";
+        }
+
+        if (daysUntilExpiry <= 7) {
+            return "expiry-warning";
+        }
+
+        return "expiry-fine";
+    };
+
+    const formatTotalAmount = (amount, unit) => {
+        if (amount === undefined || amount === null || amount === "") {
+            return "";
+        }
+
+        const roundedAmount = Number(amount).toFixed(1);
+        const displayAmount = roundedAmount.endsWith(".0")
+            ? parseInt(roundedAmount, 10).toString()
+            : roundedAmount;
+
+        return `${displayAmount}${unit || ""}`;
+    };
+
+    const formatPortions = (portions) => {
+        if (portions === undefined || portions === null || portions === "") {
+            return "";
+        }
+
+        return Number(portions).toFixed(1);
     };
 
     const setNewItemNoExpiry = () => {
@@ -410,7 +496,7 @@ function FoodDiary() {
             name: newItem.name,
             expiryDate: newItem.expiryDate,
             calories: newItem.calories,
-            portions: newItem.portions,
+            portions: (Number(newItem.totalWeight) / Number(newItem.portionSize)).toString(),
             portionSize: newItem.portionSize,
             unit: newItem.unit,
         };
@@ -447,6 +533,11 @@ function FoodDiary() {
                     .catch(() => alert("Failed to delete item"));
             }
         } else {
+            setShowForm(false);
+            setIsClosingForm(false);
+            setShowFilters(false);
+            setIsClosingFilters(false);
+            resetNewItem();
             setSelectedItem(item._id === selectedItem?._id ? null : item);
         }
     };
@@ -569,9 +660,8 @@ function FoodDiary() {
 
     return (
         <div className="foodDiary-container">
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                <button className="add-btn" onClick={() => {
-                    if (showForm) {
+            <div className="foodDiary-controls" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                <button className={`add-btn ${selectedItem ? "hidden-control-btn" : ""}`} onClick={() => {                    if (showForm) {
                         cancelAddFood();
                     } else {
                         if (showFilters) {
@@ -606,6 +696,28 @@ function FoodDiary() {
                 }}>
                     {showFilters ? "Hide Filters" : "Show Filters"}
                 </button>
+                <div className="settings-wrapper" ref={settingsWrapperRef}>
+                    <button
+                        className="settings-btn"
+                        type="button"
+                        onClick={() => {
+                            if (showSettings) {
+                                closeSettings();
+                            } else {
+                                setIsClosingSettings(false);
+                                setShowSettings(true);
+                            }
+                        }}
+                    >
+                        Settings
+                    </button>
+
+                    {showSettings && (
+                        <div className={`settings-pane ${isClosingSettings ? "settings-pane-closing" : "settings-pane-opening"}`}>
+                            Settings
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="food-form-slot">
                 {showForm && (
@@ -656,37 +768,53 @@ function FoodDiary() {
 
                         <label className="food-form-field">
                             <span>Portion Size</span>
-                            <input
-                                name="portionSize"
-                                placeholder={
-                                    !autoFillEnabled || manualPortionFallback
-                                        ? "Enter portion size"
+                            {autoFillEnabled && !manualPortionFallback ? (
+                                <div className="auto-filled-display">
+                                    {!newItem.name || !newItem.totalWeight
+                                        ? "-"
                                         : calorieLoading
                                             ? "Calculating..."
-                                            : "Recommended portion size"
-                                }
-                                onChange={handleChange}
-                                value={newItem.portionSize}
-                                type="number"
-                                step="0.25"
-                                min="0"
-                                readOnly={autoFillEnabled && !manualPortionFallback}
-                            />
+                                            : newItem.portionSize
+                                                ? `${newItem.portionSize}${newItem.unit}`
+                                                : "-"}
+                                </div>
+                            ) : (
+                                <input
+                                    name="portionSize"
+                                    placeholder="Enter portion size"
+                                    onChange={handleChange}
+                                    value={newItem.portionSize}
+                                    type="number"
+                                    step="0.25"
+                                    min="0"
+                                />
+                            )}
                         </label>
 
                         <label className="food-form-field">
                             <span>Calories Per Portion</span>
-                            <input
-                                name="calories"
-                                placeholder={!autoFillEnabled || manualPortionFallback ? "Enter calories per portion" : calorieLoading ? "Calculating..." : "Calories per portion"}
-                                onChange={handleChange}
-                                onKeyDown={blockDecimalKey}
-                                value={newItem.calories}
-                                type="number"
-                                step="1"
-                                min="0"
-                                readOnly={autoFillEnabled && !manualPortionFallback}
-                            />
+                            {autoFillEnabled && !manualPortionFallback ? (
+                                <div className="auto-filled-display">
+                                    {!newItem.name || !newItem.totalWeight
+                                        ? "-"
+                                        : calorieLoading
+                                            ? "Calculating..."
+                                            : newItem.calories
+                                                ? `${newItem.calories} cal`
+                                                : "-"}
+                                </div>
+                            ) : (
+                                <input
+                                    name="calories"
+                                    placeholder="Enter calories per portion"
+                                    onChange={handleChange}
+                                    onKeyDown={blockDecimalKey}
+                                    value={newItem.calories}
+                                    type="number"
+                                    step="1"
+                                    min="0"
+                                />
+                            )}
                         </label>
                         <button
                             type="button"
@@ -717,7 +845,8 @@ function FoodDiary() {
                 )}
 
                 {showFilters && !showForm && (
-                    <div className={`food-form filter-form ${isClosingFilters ? "food-form-closing" : "food-form-opening"}`}>                        <label className="food-form-field">
+                    <div className={`food-form filter-form ${selectedItem ? "filter-form-breakdown" : ""} ${isClosingFilters ? "food-form-closing" : "food-form-opening"}`}>
+                        <label className="food-form-field">
                             <span>Food Name</span>
                             <input
                                 name="name"
@@ -767,7 +896,7 @@ function FoodDiary() {
             </div>
 
             {selectedItem && selectedItem.entries ? (
-                <div className="panel">
+                <div className="panel breakdown-panel">
                     <div className="table-scroll">
                         {editingItem ? (
                             <>
@@ -846,9 +975,10 @@ function FoodDiary() {
                                                 style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
                                             >
                                                 <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                                <td>{formatExpiryDate(entry.expiryDate)}</td>
-                                                <td>{entry.calories}</td>
-                                                <td>{entry.portions}</td>
+                                                <td className={getExpiryStatusClass(entry.expiryDate)}>
+                                                    {formatExpiryDate(entry.expiryDate)}
+                                                </td>                                                <td>{entry.calories}</td>
+                                                <td>{formatPortions(entry.portions)}</td>
                                                 <td>{entry.portionSize ? `${entry.portionSize}${entry.unit}` : ""}</td>
                                                 <td>{entry.unit || ""}</td>
                                                 <td></td>
@@ -860,7 +990,7 @@ function FoodDiary() {
                                         <td>Total Portions</td>
                                         <td></td>
                                         <td></td>
-                                        <td>{selectedItem.portions}</td>
+                                        <td>{formatPortions(selectedItem.portions)}</td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
@@ -871,8 +1001,7 @@ function FoodDiary() {
                             </>
                         ) : (
                             <>
-                                <h3>{selectedItem.name}</h3>
-                                <table className="food_diary-table">
+                                <h3 className="breakdown-panel-title">{selectedItem.name}</h3>                                <table className="food_diary-table">
                                     <thead>
                                     <tr>
                                         <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
@@ -901,11 +1030,12 @@ function FoodDiary() {
                                             style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
                                         >
                                             <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                            <td>{formatExpiryDate(entry.expiryDate)}</td>
-                                            <td>{entry.calories}</td>
-                                            <td>{entry.portions}</td>
+                                            <td className={getExpiryStatusClass(entry.expiryDate)}>
+                                                {formatExpiryDate(entry.expiryDate)}
+                                            </td>                                            <td>{entry.calories}</td>
+                                            <td>{formatPortions(entry.portions)}</td>
                                             <td>{entry.portionSize ? `${entry.portionSize}${entry.unit}` : ""}</td>
-                                            <td>{entry.totalAmount ? `${entry.totalAmount}${entry.unit}` : ""}</td>
+                                            <td>{formatTotalAmount(entry.totalAmount, entry.unit)}</td>
                                             <td>
                                                 <button
                                                     onClick={(e) => {
@@ -922,16 +1052,23 @@ function FoodDiary() {
                                         <td>Total</td>
                                         <td></td>
                                         <td></td>
-                                        <td>{selectedItem.portions}</td>
+                                        <td>{formatPortions(selectedItem.portions)}</td>
                                         <td></td>
-                                        <td>{selectedItem.totalAmount && selectedItem.unit ? `${selectedItem.totalAmount}${selectedItem.unit}` : ""}</td>
+                                        <td>{formatTotalAmount(selectedItem.totalAmount, selectedItem.unit)}</td>
                                         <td></td>
                                     </tr>
                                     </tbody>
                                 </table>
                             </>
                         )}
-                        <button onClick={() => { setSelectedItem(null); setEditingItem(null); }}>Close</button>
+                        <button onClick={() => {
+                            setSelectedItem(null);
+                            setEditingItem(null);
+                            setShowFilters(false);
+                            setIsClosingFilters(false);
+                        }}>
+                            Close
+                        </button>
                     </div>
 
                 </div>
@@ -973,14 +1110,13 @@ function FoodDiary() {
                                     >
                                         <td>{item.name}</td>
                                         <td>{item.calories}</td>
-                                        <td>{item.portions}</td>
+                                        <td>{formatPortions(item.portions)}</td>
                                         <td>
-                                            {item.totalAmount && item.unit
-                                                ? `${item.totalAmount}${item.unit}`
-                                                : ""}
+                                            {formatTotalAmount(item.totalAmount, item.unit)}
                                         </td>
-                                        <td>{formatExpiryDate(item.expiryDate)}</td>
-                                    </tr>
+                                        <td className={getExpiryStatusClass(item.expiryDate)}>
+                                            {formatExpiryDate(item.expiryDate)}
+                                        </td>                                    </tr>
                                 ))
                             )}
                             </tbody>

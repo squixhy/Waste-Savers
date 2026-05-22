@@ -123,21 +123,14 @@ function getNutrientAmount(nutrient) {
 }
 
 function getRecommendedPortion(food, requestedUnit) {
-    const firstGramPortion = food.foodPortions?.find((portion) => portion.gramWeight);
-
+    const firstGramPortion = food.foodPortions?.find(
+        (portion) => portion.gramWeight && Number(portion.gramWeight) >= 25
+    );
     if (requestedUnit === "ml") {
-        if (food.servingSize && food.servingSizeUnit?.toLowerCase() === "ml") {
-            return {
-                recommendedPortionSize: Number(food.servingSize),
-                recommendedPortionUnit: "ml",
-                portionSource: "USDA servingSize"
-            };
-        }
-
         return {
             recommendedPortionSize: 250,
             recommendedPortionUnit: "ml",
-            portionSource: "fallback"
+            portionSource: "liquid fallback"
         };
     }
 
