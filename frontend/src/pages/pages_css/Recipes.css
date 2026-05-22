@@ -13,6 +13,13 @@
   color: #fff;
   margin-bottom: 25px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  outline: none;
+}
+
+.recipes-hero:focus,
+.recipes-hero:focus-visible {
+  outline: 3px solid #6b9278;
+  outline-offset: 4px;
 }
 
 .recipes-hero--make {
@@ -52,12 +59,19 @@
   color: inherit;
   cursor: pointer;
   width: 100%;
+  outline: none;
 }
 
 .recipe-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
   background: #f7faf8;
+}
+
+.recipe-card:focus,
+.recipe-card:focus-visible {
+  outline: 3px solid #6b9278;
+  outline-offset: 2px;
 }
 
 .recipe-card h3 {
@@ -104,10 +118,17 @@
   border: none;
   cursor: pointer;
   transition: background 0.2s ease;
+  outline: none;
 }
 
 .back-button:hover {
   background: #4f7a62;
+}
+
+.back-button:focus,
+.back-button:focus-visible {
+  outline: 3px solid #6b9278;
+  outline-offset: 2px;
 }
 
 
@@ -143,6 +164,14 @@
   line-height: 1;
   color: #3f6652;
   cursor: pointer;
+  outline: none;
+}
+
+.modal-close:focus,
+.modal-close:focus-visible {
+  outline: 3px solid #6b9278;
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
 .modal-image {
@@ -180,4 +209,15 @@
 
 .instructions ol {
   padding-left: 20px;
+}
+
+.modal a {
+  outline: none;
+}
+
+.modal a:focus,
+.modal a:focus-visible {
+  outline: 3px solid #6b9278;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
