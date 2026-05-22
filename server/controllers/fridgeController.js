@@ -33,7 +33,6 @@ async function getFoodDiary(req, res) {
                 dateAdded: item.dateAdded
             });
 
-            // keep the closest expiry date
             if (!grouped[key].expiryDate || new Date(item.expiryDate) < new Date(grouped[key].expiryDate)) {
                 grouped[key].expiryDate = item.expiryDate;
             }
