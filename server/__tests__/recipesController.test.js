@@ -1,18 +1,12 @@
-// Tests for the recipe finder controller.
-// Place this file at:  server/__tests__/recipesController.test.js
-// Adjust the three require paths below if your folder layout differs.
+
 
 const { getRecipes, getRecipeById } = require('../controllers/recipesController');
 const Ingredient = require('../models/Ingredient');
 const spoonacular = require('../services/spoonacular');
 
-// Replace the real model and service with mocks so tests are deterministic
-// and never touch MongoDB or the Spoonacular API.
 jest.mock('../models/Ingredient');
 jest.mock('../services/spoonacular');
 
-// Minimal Express response double. Both methods are chainable, matching
-// the real res.status(...).json(...) usage in the controller.
 function mockRes() {
   return {
     json: jest.fn().mockReturnThis(),
@@ -20,8 +14,6 @@ function mockRes() {
   };
 }
 
-// The controller calls Ingredient.find({}, 'name').lean(), so the mock
-// must return an object exposing a lean() that resolves to the documents.
 function stubFridge(names) {
   Ingredient.find.mockReturnValue({
     lean: jest.fn().mockResolvedValue(names.map((name) => ({ name }))),
@@ -45,7 +37,6 @@ describe('getRecipes', () => {
       canMake: [],
       closeTo: [],
     });
-    // The empty-fridge short-circuit must avoid the API call entirely.
     expect(spoonacular.findRecipesByIngredients).not.toHaveBeenCalled();
   });
 
@@ -69,8 +60,8 @@ describe('getRecipes', () => {
   test('AT-03: excludes recipes needing more than CLOSE_THRESHOLD (3) ingredients', async () => {
     stubFridge(['egg']);
     spoonacular.findRecipesByIngredients.mockResolvedValue([
-      { id: 1, missedIngredientCount: 3 }, // boundary: included
-      { id: 2, missedIngredientCount: 4 }, // boundary: excluded
+      { id: 1, missedIngredientCount: 3 }, 
+      { id: 2, missedIngredientCount: 4 }, 
     ]);
     const res = mockRes();
 
