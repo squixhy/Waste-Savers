@@ -53,6 +53,7 @@ function Recipes() {
     setDetail(null);
     setDetailStatus("loading");
     setDetailError("");
+    setTimeout(() => document.querySelector(".modal-close")?.focus(), 0);
     try {
       const res = await fetch(`${API_URL}/recipes/${recipe.id}`);
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -90,7 +91,7 @@ function Recipes() {
       {status === "ready" && !fridgeEmpty && (
         <>
           <section className="recipes-section">
-            <header className="recipes-hero recipes-hero--make">
+            <header className="recipes-hero recipes-hero--make" tabIndex="0">
               <h1>Foods you can make</h1>
               <p>{canMake.length} recipes ready with what you have.</p>
             </header>
@@ -106,7 +107,7 @@ function Recipes() {
           </section>
 
           <section className="recipes-section">
-            <header className="recipes-hero recipes-hero--close">
+            <header className="recipes-hero recipes-hero--close" tabIndex="0">
               <h1>Foods you can nearly make</h1>
               <p>{closeTo.length} recipes within 3 ingredients of your fridge.</p>
             </header>
@@ -152,8 +153,8 @@ function RecipeCard({ recipe, onClick }) {
 
 function RecipeModal({ summary, detail, status, error, onClose }) {
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
 
         {summary.image && (

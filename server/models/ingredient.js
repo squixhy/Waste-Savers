@@ -7,6 +7,6 @@ const ingredientScheme = new mongoose.Schema({
   calories: { type: Number },
   quantity: { type: Number }
 });
-// Ingredients are sorted by name, dateAdded, expiryDate, calories, quantity. 
+
 
 module.exports = mongoose.models.Ingredients || mongoose.model('Ingredients', ingredientScheme);
