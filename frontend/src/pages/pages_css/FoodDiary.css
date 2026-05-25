@@ -177,17 +177,6 @@
     border-color: #3f6652;
 }
 
-.expiry-input-row {
-    display: flex;
-    align-items: center;
-    gap: 0.3vw;
-    width: 100%;
-}
-
-.expiry-input-row input {
-    flex: 1 1 auto;
-    min-width: 0;
-}
 
 .no-expiry-btn {
     height: 3.2vh;
@@ -527,12 +516,6 @@
     overflow: visible;
 }
 
-.breakdown-panel-title {
-    position: absolute;
-    top: 1.2vw;
-    left: 1.2vw;
-    margin: 0;
-}
 .food_diary-table td.expiry-alert {
     background-color: #a1001d;
     color: #fff;
@@ -556,7 +539,9 @@
     gap: 0.6vw;
     margin-bottom: 1.6vh;
     width: 70vw;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 .foodDiary-controls > .add-btn {
@@ -993,41 +978,34 @@
     flex: 1;
 }
 
+.side-add-food-btn,
+.side-filter-btn,
+.side-delete-btn {
+    width: 3.2vw;
+    height: 4.2vh;
+    min-width: 3.2vw;
+    min-height: 4.2vh;
+    border: none;
+    border-radius: 0.7vw;
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
 .side-add-food-btn {
-    width: 3.2vw;
-    height: 4.2vh;
-    min-width: 3.2vw;
-    min-height: 4.2vh;
-    border: none;
-    border-radius: 0.7vw;
-    background-color: var(--food-diary-primary-colour, #3f6652);
-    color: var(--food-diary-heading-text-colour, #fff);
     font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
 }
 
-.side-add-food-btn:hover {
-    opacity: 0.9;
-}
-
-.side-filter-btn {
-    width: 3.2vw;
-    height: 4.2vh;
-    min-width: 3.2vw;
-    min-height: 4.2vh;
-    border: none;
-    border-radius: 0.7vw;
-    background-color: var(--food-diary-primary-colour, #3f6652);
-    color: var(--food-diary-heading-text-colour, #fff);
+.side-filter-btn,
+.side-delete-btn {
     font-size: 0.7rem;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
 }
 
-.side-filter-btn:hover {
+.side-add-food-btn:hover,
+.side-filter-btn:hover,
+.side-delete-btn:hover {
     opacity: 0.9;
 }
 
@@ -1038,24 +1016,6 @@
     flex-shrink: 0;
 }
 
-.side-delete-btn {
-    width: 3.2vw;
-    height: 4.2vh;
-    min-width: 3.2vw;
-    min-height: 4.2vh;
-    border: none;
-    border-radius: 0.7vw;
-    background-color: var(--food-diary-primary-colour, #3f6652);
-    color: var(--food-diary-heading-text-colour, #fff);
-    font-size: 0.7rem;
-    font-weight: 700;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.side-delete-btn:hover {
-    opacity: 0.9;
-}
 
 .food-diary-page-switch-buttons {
     display: flex;
@@ -1081,4 +1041,31 @@
 
 .food-diary-page-switch-buttons button:hover {
     opacity: 0.9;
+}
+
+.food-diary-main-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    text-align: center;
+    color: var(--food-diary-primary-colour, #3f6652);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 4vh;
+}
+
+.breakdown-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+}
+
+.breakdown-panel-title {
+    margin: 0;
+    text-align: center;
+    color: var(--food-diary-primary-colour, #3f6652);
+    font-size: 1.1rem;
+    font-weight: 700;
 }

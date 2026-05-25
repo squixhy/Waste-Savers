@@ -158,6 +158,12 @@ function FoodDiary() {
             );
 
             if (e.key === "Backspace" && !isTypingInField) {
+                if (mode === 'delete') {
+                    e.preventDefault();
+                    setMode(null);
+                    return;
+                }
+
                 if (showFilters) {
                     e.preventDefault();
                     closeFilters();
@@ -1020,7 +1026,9 @@ function FoodDiary() {
                 color: generalSettings.bodyTextColour,
             }}
         >
-            <div className="foodDiary-controls" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            <div className="foodDiary-controls">
+                <h2 className="food-diary-main-title">Food Diary</h2>
+
                 <div className="settings-wrapper" ref={settingsWrapperRef}>
                     <button
                         className="settings-btn"
@@ -1526,80 +1534,145 @@ function FoodDiary() {
             </div>
 
             {selectedItem && selectedItem.entries ? (
-                <div className="panel breakdown-panel">
-                    <div className="table-scroll">
-                        {editingItem ? (
-                            <>
-                                <div className="edit-entry-form">
-                                    <label className="food-form-field">
-                                        <span>Food Name</span>
-                                        <input
-                                            name="name"
-                                            value={editingItem.name}
-                                            onChange={handleEditChange}
-                                            required
-                                        />
-                                    </label>
-                                </div>
-                                <table className="food_diary-table">
-                                    <thead>
-                                    <tr>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
-                                            Date Added <span className="sort-icon">{getSortIcon(breakdownSort, "dateAdded")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
-                                            Expiry Date <span className="sort-icon">{getSortIcon(breakdownSort, "expiryDate")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
-                                            Calories <span className="sort-icon">{getSortIcon(breakdownSort, "calories")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("portions")}>
-                                            Portions <span className="sort-icon">{getSortIcon(breakdownSort, "portions")}</span>
-                                        </th>
-                                        <th>Portion Amount</th>
-                                        <th>Unit</th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {sortedBreakdownEntries.map((entry) => (
-                                        entry._id === editingItem._id ? (
-                                            <tr key={entry._id}>
-                                                <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                                <td>
-                                                    <div className="expiry-input-row table-expiry-input-row">
-                                                        {editingItem.expiryDate?.slice(0, 10) === noExpiryDateValue ? (
-                                                            <input value="NoExpiry" type="text" readOnly required onClick={clearEditingItemNoExpiry} />
-                                                        ) : (
-                                                            <input name="expiryDate" type="date" onChange={handleEditChange} value={editingItem.expiryDate?.slice(0, 10)} required />
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            className={`no-expiry-btn ${editingItem.expiryDate?.slice(0, 10) === noExpiryDateValue ? "hidden-no-expiry-btn" : ""}`}
-                                                            onClick={setEditingItemNoExpiry}
-                                                        >
-                                                            X
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td><input name="calories" type="number" onChange={handleEditChange} value={editingItem.calories} required /></td>
-                                                <td><input name="portions" type="number" onChange={handleEditChange} value={editingItem.portions} required /></td>
-                                                <td><input name="portionSize" type="number" onChange={handleEditChange} value={editingItem.portionSize} required /></td>
-                                                <td>
-                                                    <select name="unit" onChange={handleEditChange} value={editingItem.unit} required>
-                                                        <option value="">Select</option>
-                                                        <option value="g">g</option>
-                                                        <option value="ml">ml</option>
-                                                    </select>
-                                                </td>
-                                                <td></td>
-                                                <td>
-                                                    <button onClick={handleEditSave}>Save</button>
-                                                    <button onClick={() => setEditingItem(null)}>Cancel</button>
-                                                </td>
-                                            </tr>
-                                        ) : (
+                <div className="panel breakdown-panel food-diary-panel-with-side-add">
+                    <div className="side-table-button-column">
+                        <button
+                            className={`side-delete-btn ${mode === 'delete' ? 'active-mode-delete' : ''}`}
+                            onClick={() => toggleMode('delete')}
+                        >
+                            Bin
+                        </button>
+                    </div>
+                    <div className="breakdown-content">
+                        <h3 className="breakdown-panel-title">{selectedItem.name}</h3>
+                        <div className="table-scroll">
+                            {editingItem ? (
+                                <>
+                                    <div className="edit-entry-form">
+                                        <label className="food-form-field">
+                                            <span>Food Name</span>
+                                            <input
+                                                name="name"
+                                                value={editingItem.name}
+                                                onChange={handleEditChange}
+                                                required
+                                            />
+                                        </label>
+                                    </div>
+                                    <table className="food_diary-table">
+                                        <thead>
+                                        <tr>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
+                                                Date Added <span className="sort-icon">{getSortIcon(breakdownSort, "dateAdded")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
+                                                Expiry Date <span className="sort-icon">{getSortIcon(breakdownSort, "expiryDate")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
+                                                Calories <span className="sort-icon">{getSortIcon(breakdownSort, "calories")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("portions")}>
+                                                Portions <span className="sort-icon">{getSortIcon(breakdownSort, "portions")}</span>
+                                            </th>
+                                            <th>Portion Amount</th>
+                                            <th>Unit</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {sortedBreakdownEntries.map((entry) => (
+                                            entry._id === editingItem._id ? (
+                                                <tr key={entry._id}>
+                                                    <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <div className="expiry-input-row table-expiry-input-row">
+                                                            {editingItem.expiryDate?.slice(0, 10) === noExpiryDateValue ? (
+                                                                <input value="NoExpiry" type="text" readOnly required onClick={clearEditingItemNoExpiry} />
+                                                            ) : (
+                                                                <input name="expiryDate" type="date" onChange={handleEditChange} value={editingItem.expiryDate?.slice(0, 10)} required />
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                className={`no-expiry-btn ${editingItem.expiryDate?.slice(0, 10) === noExpiryDateValue ? "hidden-no-expiry-btn" : ""}`}
+                                                                onClick={setEditingItemNoExpiry}
+                                                            >
+                                                                X
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td><input name="calories" type="number" onChange={handleEditChange} value={editingItem.calories} required /></td>
+                                                    <td><input name="portions" type="number" onChange={handleEditChange} value={editingItem.portions} required /></td>
+                                                    <td><input name="portionSize" type="number" onChange={handleEditChange} value={editingItem.portionSize} required /></td>
+                                                    <td>
+                                                        <select name="unit" onChange={handleEditChange} value={editingItem.unit} required>
+                                                            <option value="">Select</option>
+                                                            <option value="g">g</option>
+                                                            <option value="ml">ml</option>
+                                                        </select>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <button onClick={handleEditSave}>Save</button>
+                                                        <button onClick={() => setEditingItem(null)}>Cancel</button>
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                <tr
+                                                    key={entry._id}
+                                                    className={mode === 'delete' ? 'delete-mode-row' : ''}
+                                                    onClick={() => handleBreakdownRowClick(entry)}
+                                                    style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
+                                                >
+                                                    <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
+                                                    <td style={getExpiryStatusStyle(entry.expiryDate)}>
+                                                        {formatExpiryDate(entry.expiryDate)}
+                                                    </td>                                                <td>{entry.calories}</td>
+                                                    <td>{formatPortions(entry.portions)}</td>
+                                                    <td>{entry.portionSize ? `${entry.portionSize}${entry.unit}` : ""}</td>
+                                                    <td>{entry.unit || ""}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            )
+                                        ))}
+                                        <tr style={{ fontWeight: 'bold' }}>
+                                            <td>Total Portions</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{formatPortions(selectedItem.portions)}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </>
+                            ) : (
+                                <>
+                                    <table className="food_diary-table">
+                                        <thead>
+                                        <tr>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
+                                                Date Added <span className="sort-icon">{getSortIcon(breakdownSort, "dateAdded")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
+                                                Expiry Date <span className="sort-icon">{getSortIcon(breakdownSort, "expiryDate")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
+                                                Calories <span className="sort-icon">{getSortIcon(breakdownSort, "calories")}</span>
+                                            </th>
+                                            <th className="sortable-heading" onClick={() => toggleBreakdownSort("portions")}>
+                                                Portions <span className="sort-icon">{getSortIcon(breakdownSort, "portions")}</span>
+                                            </th>
+                                            <th>Portion Amount</th>
+                                            <th>Total Amount</th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {sortedBreakdownEntries.map((entry) => (
                                             <tr
                                                 key={entry._id}
                                                 className={mode === 'delete' ? 'delete-mode-row' : ''}
@@ -1609,101 +1682,45 @@ function FoodDiary() {
                                                 <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
                                                 <td style={getExpiryStatusStyle(entry.expiryDate)}>
                                                     {formatExpiryDate(entry.expiryDate)}
-                                                </td>                                                <td>{entry.calories}</td>
+                                                </td>                                            <td>{entry.calories}</td>
                                                 <td>{formatPortions(entry.portions)}</td>
                                                 <td>{entry.portionSize ? `${entry.portionSize}${entry.unit}` : ""}</td>
-                                                <td>{entry.unit || ""}</td>
-                                                <td></td>
-                                                <td></td>
+                                                <td>{formatTotalAmount(entry.totalAmount, entry.unit)}</td>
+                                                <td>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingItem({ ...selectedItem, ...entry, _id: entry._id });
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </td>
                                             </tr>
-                                        )
-                                    ))}
-                                    <tr style={{ fontWeight: 'bold' }}>
-                                        <td>Total Portions</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>{formatPortions(selectedItem.portions)}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </>
-                        ) : (
-                            <>
-                                <h3 className="breakdown-panel-title">{selectedItem.name}</h3>
-                                <table className="food_diary-table">
-                                    <thead>
-                                    <tr>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("dateAdded")}>
-                                            Date Added <span className="sort-icon">{getSortIcon(breakdownSort, "dateAdded")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("expiryDate")}>
-                                            Expiry Date <span className="sort-icon">{getSortIcon(breakdownSort, "expiryDate")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("calories")}>
-                                            Calories <span className="sort-icon">{getSortIcon(breakdownSort, "calories")}</span>
-                                        </th>
-                                        <th className="sortable-heading" onClick={() => toggleBreakdownSort("portions")}>
-                                            Portions <span className="sort-icon">{getSortIcon(breakdownSort, "portions")}</span>
-                                        </th>
-                                        <th>Portion Amount</th>
-                                        <th>Total Amount</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {sortedBreakdownEntries.map((entry) => (
-                                        <tr
-                                            key={entry._id}
-                                            className={mode === 'delete' ? 'delete-mode-row' : ''}
-                                            onClick={() => handleBreakdownRowClick(entry)}
-                                            style={{ cursor: mode === 'delete' ? 'pointer' : 'default' }}
-                                        >
-                                            <td>{new Date(entry.dateAdded).toLocaleDateString()}</td>
-                                            <td style={getExpiryStatusStyle(entry.expiryDate)}>
-                                                {formatExpiryDate(entry.expiryDate)}
-                                            </td>                                            <td>{entry.calories}</td>
-                                            <td>{formatPortions(entry.portions)}</td>
-                                            <td>{entry.portionSize ? `${entry.portionSize}${entry.unit}` : ""}</td>
-                                            <td>{formatTotalAmount(entry.totalAmount, entry.unit)}</td>
-                                            <td>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingItem({ ...selectedItem, ...entry, _id: entry._id });
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
-                                            </td>
+                                        ))}
+                                        <tr style={{ fontWeight: 'bold' }}>
+                                            <td>Total</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{formatPortions(selectedItem.portions)}</td>
+                                            <td></td>
+                                            <td>{formatTotalAmount(selectedItem.totalAmount, selectedItem.unit)}</td>
+                                            <td></td>
                                         </tr>
-                                    ))}
-                                    <tr style={{ fontWeight: 'bold' }}>
-                                        <td>Total</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>{formatPortions(selectedItem.portions)}</td>
-                                        <td></td>
-                                        <td>{formatTotalAmount(selectedItem.totalAmount, selectedItem.unit)}</td>
-                                        <td></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </>
-                        )}
-                        <button onClick={() => {
-                            setSelectedItem(null);
-                            setEditingItem(null);
-                            setShowFilters(false);
-                            setIsClosingFilters(false);
-                        }}>
-                            Close
-                        </button>
+                                        </tbody>
+                                    </table>
+                                </>
+                            )}
+                            <button onClick={() => {
+                                setSelectedItem(null);
+                                setEditingItem(null);
+                                setShowFilters(false);
+                                setIsClosingFilters(false);
+                            }}>
+                                Close
+                            </button>
+                        </div>
                     </div>
-
                 </div>
             ) : (
                 //homepage table
