@@ -1,13 +1,13 @@
 import FoodDiary from "../../components/FoodDiary";
 import PlannerBtn from "../../components/PlannerBtn";
-import RecipesBtn from "../../components/RecipesBtn"; // adjust path if needed
+import RecipesBtn from "../../components/RecipesBtn";
 
 function Homepage() {
     return (
         <main className="homepage-container">
 
-            <FoodDiary />  {/* ← add this wherever you want the table */}
-            <div style={{display: 'flex', flexDirection: 'row'}}>
+            <FoodDiary />
+            <div style={{display: 'flex', flexDirection: 'row'}} className="food-diary-page-switch-buttons">
                 <PlannerBtn />
                 <RecipesBtn />
             </div>
