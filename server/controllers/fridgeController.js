@@ -235,28 +235,55 @@ function selectBestServing(servings, requestedUnit) {
         normaliseServingUnit(getServingMetricUnit(serving)) === normalisedRequestedUnit
     );
 
-    if (exactUnitMatch.length > 0) {
-        return exactUnitMatch.find((serving) => Number(serving.is_default) === 1) || exactUnitMatch[0];
-    }
+    const servingsToCheck = exactUnitMatch.length > 0 ? exactUnitMatch : usableServings;
 
-    if (normalisedRequestedUnit === "ml") {
-        const gramServing = usableServings.find((serving) =>
-            normaliseServingUnit(getServingMetricUnit(serving)) === "g"
-        );
+    const sensibleServings = servingsToCheck.filter((serving) => {
+        const amount = getServingMetricAmount(serving);
 
-        if (gramServing) {
-            return {
-                ...gramServing,
-                metric_serving_unit: "ml",
-                metric_serving_amount: getServingMetricAmount(gramServing)
-            };
+        if (normalisedRequestedUnit === "g") {
+            return amount >= 15 && amount <= 500;
         }
+
+        if (normalisedRequestedUnit === "ml") {
+            return amount >= 15 && amount <= 1000;
+        }
+
+        return true;
+    });
+
+    const preferredServings = sensibleServings.length > 0 ? sensibleServings : servingsToCheck;
+
+    const servingWithUsefulDescription = preferredServings.find((serving) => {
+        const description = String(serving.serving_description || serving.measurement_description || "").toLowerCase();
+
+        return (
+            description.includes("serving") ||
+            description.includes("slice") ||
+            description.includes("rasher") ||
+            description.includes("piece") ||
+            description.includes("strip")
+        );
+    });
+
+    if (servingWithUsefulDescription) {
+        return servingWithUsefulDescription;
     }
 
-    return usableServings.find((serving) => Number(serving.is_default) === 1) || usableServings[0];
+    const defaultServing = preferredServings.find((serving) => Number(serving.is_default) === 1);
+
+    if (defaultServing) {
+        return defaultServing;
+    }
+
+    return preferredServings.sort((a, b) => {
+        const aAmount = getServingMetricAmount(a);
+        const bAmount = getServingMetricAmount(b);
+
+        return Math.abs(aAmount - 100) - Math.abs(bAmount - 100);
+    })[0];
 }
 
-async function getFatSecretFoodDetails(name, requestedUnit) {
+async function getFatSecretFoodDetails(name, requestedUnit, selectedFoodId = null) {
     const searchData = await callFatSecretApi({
         method: "foods.search",
         search_expression: name,
@@ -270,7 +297,48 @@ async function getFatSecretFoodDetails(name, requestedUnit) {
         return null;
     }
 
-    for (const food of foods) {
+    const foodOptions = foods.map((food) => ({
+        foodId: String(food.food_id || food.foodId),
+        foodName: food.food_name || food.foodName,
+        brandName: food.brand_name || food.brandName || "",
+        foodDescription: food.food_description || food.foodDescription || ""
+    }));
+
+    if (selectedFoodId) {
+        const selectedFoodData = await callFatSecretApi({
+            method: "food.get.v5",
+            food_id: selectedFoodId,
+            serving_amount_unit: requestedUnit
+        });
+
+        const selectedServings = getFatSecretServings(selectedFoodData);
+        const selectedServing = selectBestServing(selectedServings, requestedUnit);
+
+        if (selectedServing) {
+            const selectedOption = foodOptions.find((food) =>
+                String(food.foodId) === String(selectedFoodId)
+            );
+
+            return {
+                food: selectedFoodData.food,
+                serving: selectedServing,
+                foodOptions: selectedOption
+                    ? [
+                        selectedOption,
+                        ...foodOptions.filter((food) => String(food.foodId) !== String(selectedFoodId))
+                    ]
+                    : foodOptions
+            };
+        }
+    }
+
+    const exactNameMatch = foods.find((food) =>
+        String(food.food_name || food.foodName || "").toLowerCase().trim() === String(name || "").toLowerCase().trim()
+    );
+
+    const foodsToCheck = exactNameMatch ? [exactNameMatch] : foods;
+
+    for (const food of foodsToCheck) {
         const foodId = food.food_id || food.foodId;
 
         if (!foodId) {
@@ -289,7 +357,8 @@ async function getFatSecretFoodDetails(name, requestedUnit) {
         if (selectedServing) {
             return {
                 food: foodData.food,
-                serving: selectedServing
+                serving: selectedServing,
+                foodOptions
             };
         }
     }
@@ -299,7 +368,7 @@ async function getFatSecretFoodDetails(name, requestedUnit) {
 
 async function getCaloriesFromUsda(req, res) {
     try {
-        const { name, amount, unit } = req.query;
+        const { name, amount, unit, foodId } = req.query;
 
         if (!name || !amount || !unit) {
             return res.status(400).json({
@@ -315,7 +384,7 @@ async function getCaloriesFromUsda(req, res) {
             });
         }
 
-        const fatSecretFood = await getFatSecretFoodDetails(name, requestedUnit);
+        const fatSecretFood = await getFatSecretFoodDetails(name, requestedUnit, foodId);
 
         if (!fatSecretFood) {
             return res.status(404).json({
@@ -323,7 +392,7 @@ async function getCaloriesFromUsda(req, res) {
             });
         }
 
-        const { food, serving } = fatSecretFood;
+        const { food, serving, foodOptions } = fatSecretFood;
         const servingAmount = getServingMetricAmount(serving);
         const servingUnit = getServingMetricUnit(serving);
         const servingCalories = Number(serving.calories);
@@ -340,7 +409,7 @@ async function getCaloriesFromUsda(req, res) {
 
         res.json({
             foodName: food.food_name || food.foodName || name,
-            fatSecretFoodId: food.food_id || food.foodId,
+            fatSecretFoodId: String(food.food_id || food.foodId || foodId || ""),
             amount: Number(amount),
             unit: requestedUnit,
             caloriesPer100g: Number(caloriesPer100.toFixed(2)),
@@ -348,7 +417,8 @@ async function getCaloriesFromUsda(req, res) {
             recommendedPortionSize: Number(servingAmount.toFixed(2)),
             recommendedPortionUnit: servingUnit,
             portionSource: serving.measurement_description || "FatSecret serving",
-            caloriesPerRecommendedPortion: Math.round(servingCalories)
+            caloriesPerRecommendedPortion: Math.round(servingCalories),
+            foodOptions: foodOptions || []
         });
     } catch (err) {
         console.error("Failed to fetch calories from FatSecret:", err);

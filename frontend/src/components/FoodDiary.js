@@ -3,23 +3,28 @@ import '../pages/pages_css/FoodDiary.css'
 import { useState, useEffect, useRef } from "react";
 
 function FoodDiary() {
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+    const notificationSettingsStorageKey = "foodDiaryNotificationSettings";
+    const notificationsEnabledStorageKey = "foodDiaryNotificationsEnabled";
+    const generalSettingsStorageKey = "foodDiaryGeneralSettings";
     const [foodItems, setFoodItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [, setError] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [isClosingForm, setIsClosingForm] = useState(false);
     const [isClosingFilters, setIsClosingFilters] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [notificationSettings, setNotificationSettings] = useState({
-        high: { visible: true, colour: "#a1001d", days: 3 },
-        medium: { visible: true, colour: "#d99a00", days: 7 },
-        low: { visible: true, colour: "#00813d" },
-        none: { visible: true, colour: "#00813d" },
-    });
+    const [showGeneralSettings, setShowGeneralSettings] = useState(false);
     const [isClosingSettings, setIsClosingSettings] = useState(false);
+    const [showResetAllPrompt, setShowResetAllPrompt] = useState(false);
     const settingsWrapperRef = useRef(null);
     const [mode, setMode] = useState(null);
     const [editingItem, setEditingItem] = useState(null);
@@ -30,14 +35,76 @@ function FoodDiary() {
     const [caloriesPer100g, setCaloriesPer100g] = useState(null);
     const [calorieLoading, setCalorieLoading] = useState(false);
     const [autoFillEnabled, setAutoFillEnabled] = useState(true);
+    const [fatSecretResults, setFatSecretResults] = useState([]);
+    const [selectedFatSecretFoodId, setSelectedFatSecretFoodId] = useState(null);
+    const [isFoodNameFocused, setIsFoodNameFocused] = useState(false);
+
+
+    const defaultNotificationSettings = {
+        high: { visible: true, colour: "#a1001d", days: 3 },
+        medium: { visible: true, colour: "#d99a00", days: 7 },
+        low: { visible: true, colour: "#00813d" },
+        noExpiry: { visible: true, colour: "#00813d" },
+    };
+
+    const defaultGeneralSettings = {
+        primaryColour: "#3f6652",
+        headingTextColour: "#fff",
+        bodyTextColour: "#000",
+        backgroundColour: "#ededed",
+        autoFillEnabled: true,
+    };
+
+    const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+        const savedValue = localStorage.getItem(notificationsEnabledStorageKey);
+        if (savedValue === null) {
+            return true;
+        }
+        return savedValue === "true";
+    });
+
+    const [notificationSettings, setNotificationSettings] = useState(() => {
+        const savedSettings = localStorage.getItem(notificationSettingsStorageKey);
+        if (!savedSettings) {
+            return defaultNotificationSettings;
+        }
+        try {
+            return {
+                ...defaultNotificationSettings,
+                ...JSON.parse(savedSettings),
+            };
+        } catch {
+            return defaultNotificationSettings;
+        }
+    });
+
+    const [generalSettings, setGeneralSettings] = useState(() => {
+        const savedSettings = localStorage.getItem(generalSettingsStorageKey);
+        if (!savedSettings) {
+            return defaultGeneralSettings;
+        }
+        try {
+            return {
+                ...defaultGeneralSettings,
+                ...JSON.parse(savedSettings),
+            };
+        } catch {
+            return defaultGeneralSettings;
+        }
+    });
+
     const [filters, setFilters] = useState({
         name: "",
         expiryDate: "",
         calories: "",
         portions: "",
+        priority: "",
     });
+
     const [newItem, setNewItem] = useState({
         name: "",
+        brandName: "",
+        fatSecretFoodId: "",
         expiryDate: "",
         totalWeight: "",
         unit: "g",
@@ -58,6 +125,28 @@ function FoodDiary() {
                 setLoading(false);
             });
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem(
+            notificationSettingsStorageKey,
+            JSON.stringify(notificationSettings)
+        );
+    }, [notificationSettings]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            notificationsEnabledStorageKey,
+            notificationsEnabled.toString()
+        );
+    }, [notificationsEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            generalSettingsStorageKey,
+            JSON.stringify(generalSettings)
+        );
+        setAutoFillEnabled(generalSettings.autoFillEnabled);
+    }, [generalSettings]);
 
     useEffect(() => {
         const handleKeyboardActions = (e) => {
@@ -126,14 +215,16 @@ function FoodDiary() {
         return () => {
             document.removeEventListener("mousedown", handleClickOutsideSettings);
         };
-    }, [showSettings, isClosingSettings]);
-
+    },
+        [showSettings, isClosingSettings]);
     useEffect(() => {
         if (!autoFillEnabled) {
             return;
         }
 
-        if (!newItem.name || !newItem.totalWeight || !newItem.unit) {
+        if (!newItem.name || !newItem.unit) {
+            setFatSecretResults([]);
+            setSelectedFatSecretFoodId(null);
             setNewItem((prev) => ({
                 ...prev,
                 portionSize: "",
@@ -143,13 +234,137 @@ function FoodDiary() {
             return;
         }
 
+        if (newItem.name.trim().length < 1) {
+            setFatSecretResults([]);
+            setSelectedFatSecretFoodId(null);
+            return;
+        }
+
         const controller = new AbortController();
 
         setCalorieLoading(true);
 
+        const autoFillTimeout = setTimeout(() => {
+            fetch(
+                `http://localhost:5050/food-diary/calories?name=${encodeURIComponent(newItem.name)}&amount=${encodeURIComponent(newItem.totalWeight || 100)}&unit=${encodeURIComponent(newItem.unit)}${newItem.fatSecretFoodId ? `&foodId=${encodeURIComponent(newItem.fatSecretFoodId)}` : ""}`,
+                { signal: controller.signal }
+            )
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error("Failed to calculate calories");
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    setCaloriesPer100g(Number(data.caloriesPer100g) || null);
+                    const foodOptions = data.foodOptions || [];
+
+                    const selectedOption = foodOptions.find((result) =>
+                        String(result.foodId) === String(newItem.fatSecretFoodId)
+                    );
+
+                    const exactMatch = foodOptions.find((result) =>
+                        result.foodName?.toLowerCase().trim() === newItem.name.toLowerCase().trim()
+                    );
+
+                    const matchedFoodId =
+                        newItem.fatSecretFoodId ||
+                        selectedOption?.foodId ||
+                        exactMatch?.foodId ||
+                        data.fatSecretFoodId ||
+                        null;
+
+                    const matchedBrandName =
+                        newItem.brandName ||
+                        selectedOption?.brandName ||
+                        exactMatch?.brandName ||
+                        "";
+
+                    const sortedFoodOptions = [...foodOptions].sort((a, b) => {
+                        const selectedA = String(a.foodId) === String(matchedFoodId);
+                        const selectedB = String(b.foodId) === String(matchedFoodId);
+
+                        if (selectedA && !selectedB) return -1;
+                        if (!selectedA && selectedB) return 1;
+
+                        return 0;
+                    });
+
+                    setFatSecretResults(sortedFoodOptions);
+
+                    setSelectedFatSecretFoodId(matchedFoodId);
+
+                    const shouldUseManualFallback =
+                        !data.recommendedPortionSize ||
+                        (data.portionSource === "fallback" && newItem.unit !== "ml");
+
+                    if (shouldUseManualFallback) {
+                        setManualPortionFallback(true);
+
+                        setNewItem((prev) => ({
+                            ...prev,
+                            portionSize: "",
+                            portions: "",
+                            calories: "",
+                        }));
+
+                        return;
+                    }
+
+                    setManualPortionFallback(false);
+
+                    const recommendedPortionSize = Number(data.recommendedPortionSize);
+                    const calculatedPortions = newItem.totalWeight
+                        ? Number(newItem.totalWeight) / recommendedPortionSize
+                        : "";
+
+                    setNewItem((prev) => ({
+                        ...prev,
+                        name: prev.fatSecretFoodId ? prev.name : selectedOption?.foodName || exactMatch?.foodName || prev.name,
+                        brandName: matchedBrandName,
+                        fatSecretFoodId: matchedFoodId || prev.fatSecretFoodId || "",
+                        portionSize: recommendedPortionSize.toString(),
+                        portions: calculatedPortions === "" ? "" : calculatedPortions.toFixed(1),
+                        calories: data.caloriesPerRecommendedPortion?.toString() || data.calories?.toString() || "",
+                    }));
+                })
+                .catch((err) => {
+                    if (err.name !== "AbortError") {
+                        console.error("Failed to auto-fill calories:", err);
+                        setManualPortionFallback(true);
+                        setNewItem((prev) => ({
+                            ...prev,
+                            portionSize: "",
+                            portions: "",
+                            calories: "",
+                        }));
+                        setFatSecretResults([]);
+                        setSelectedFatSecretFoodId(null);
+                    }
+                })
+                .finally(() => {
+                    if (!controller.signal.aborted) {
+                        setCalorieLoading(false);
+                    }
+                });
+        }, 500);
+
+        return () => {
+            clearTimeout(autoFillTimeout);
+            controller.abort();
+        };
+    }, [autoFillEnabled, newItem.name, newItem.unit]);
+
+    const selectFatSecretResult = (result) => {
+        if (!autoFillEnabled || !result.foodId) {
+            return;
+        }
+
+        setCalorieLoading(true);
+        setSelectedFatSecretFoodId(result.foodId);
+
         fetch(
-            `http://localhost:5050/food-diary/calories?name=${encodeURIComponent(newItem.name)}&amount=${encodeURIComponent(newItem.totalWeight)}&unit=${encodeURIComponent(newItem.unit)}`,
-            { signal: controller.signal }
+            `http://localhost:5050/food-diary/calories?name=${encodeURIComponent(result.foodName || newItem.name)}&amount=${encodeURIComponent(newItem.totalWeight || 100)}&unit=${encodeURIComponent(newItem.unit)}&foodId=${encodeURIComponent(result.foodId)}`
         )
             .then((res) => {
                 if (!res.ok) {
@@ -159,60 +374,59 @@ function FoodDiary() {
             })
             .then((data) => {
                 setCaloriesPer100g(Number(data.caloriesPer100g) || null);
+                const returnedFoodOptions = data.foodOptions || fatSecretResults;
+                const selectedResult = {
+                    ...result,
+                    foodId: String(result.foodId),
+                    foodName: result.foodName || newItem.name,
+                    brandName: result.brandName || "",
+                };
 
-                const shouldUseManualFallback =
-                    !data.recommendedPortionSize ||
-                    (data.portionSource === "fallback" && newItem.unit !== "ml");
+                const selectedFirstFoodOptions = [
+                    selectedResult,
+                    ...returnedFoodOptions.filter((food) =>
+                        String(food.foodId) !== String(result.foodId)
+                    ),
+                ];
 
-                if (shouldUseManualFallback) {
-                    setManualPortionFallback(true);
-
-                    setNewItem((prev) => ({
-                        ...prev,
-                        portionSize: "",
-                        portions: "",
-                        calories: "",
-                    }));
-
-                    return;
-                }
-
+                setFatSecretResults(selectedFirstFoodOptions);
+                setSelectedFatSecretFoodId(String(result.foodId));
                 setManualPortionFallback(false);
 
                 const recommendedPortionSize = Number(data.recommendedPortionSize);
-                const calculatedPortions = Number(newItem.totalWeight) / recommendedPortionSize;
+                const calculatedPortions = newItem.totalWeight
+                    ? Number(newItem.totalWeight) / recommendedPortionSize
+                    : "";
 
                 setNewItem((prev) => ({
                     ...prev,
+                    name: result.foodName || prev.name,
+                    brandName: result.brandName || "",
+                    fatSecretFoodId: result.foodId || "",
                     portionSize: recommendedPortionSize.toString(),
-                    portions: calculatedPortions.toFixed(1),
+                    portions: calculatedPortions === "" ? "" : calculatedPortions.toFixed(1),
                     calories: data.caloriesPerRecommendedPortion?.toString() || data.calories?.toString() || "",
                 }));
             })
             .catch((err) => {
-                if (err.name !== "AbortError") {
-                    console.error("Failed to auto-fill calories:", err);
-                    setManualPortionFallback(true);
-                    setNewItem((prev) => ({
-                        ...prev,
-                        portionSize: "",
-                        portions: "",
-                        calories: "",
-                    }));
-                }
+                console.error("Failed to select FatSecret result:", err);
             })
             .finally(() => {
-                if (!controller.signal.aborted) {
-                    setCalorieLoading(false);
-                }
+                setCalorieLoading(false);
             });
+    };
 
-        return () => controller.abort();
-    }, [autoFillEnabled, newItem.name, newItem.totalWeight, newItem.unit]);
+    const shouldShowFatSecretResults =
+        autoFillEnabled &&
+        isFoodNameFocused &&
+        newItem.name.trim().length >= 1 &&
+        fatSecretResults.length > 0;
 
     const resetNewItem = () => {
         setNewItem({
             name: "",
+            brandName: "",
+            fatSecretFoodId: "",
             expiryDate: "",
             totalWeight: "",
             unit: "g",
@@ -220,10 +434,13 @@ function FoodDiary() {
             portions: "",
             calories: "",
         });
-        setAutoFillEnabled(true);
+        setAutoFillEnabled(generalSettings.autoFillEnabled);
         setCalorieLoading(false);
         setManualPortionFallback(false);
         setCaloriesPer100g(null);
+        setFatSecretResults([]);
+        setSelectedFatSecretFoodId(null);
+        setIsFoodNameFocused(false);
     };
 
     const cancelAddFood = () => {
@@ -260,6 +477,9 @@ function FoodDiary() {
 
         setTimeout(() => {
             setShowSettings(false);
+            setShowNotificationSettings(false);
+            setShowGeneralSettings(false);
+            setShowResetAllPrompt(false);
             setIsClosingSettings(false);
         }, 250);
     };
@@ -293,10 +513,10 @@ function FoodDiary() {
     };
 
     const getExpiryStatusKey = (expiryDate) => {
-        if (!expiryDate) return "none";
+        if (!expiryDate) return "noExpiry";
         const dateOnly = expiryDate.slice(0, 10);
         if (dateOnly === noExpiryDateValue) {
-            return "none";
+            return "noExpiry";
         }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -329,23 +549,79 @@ function FoodDiary() {
     };
 
     const handleNotificationSettingChange = (priority, field, value) => {
-        setNotificationSettings((prev) => ({
-            ...prev,
-            [priority]: {
-                ...prev[priority],
-                [field]: value,
-            },
-        }));
+        setNotificationSettings((prev) => {
+            const updatedSettings = {
+                ...prev,
+                [priority]: {
+                    ...prev[priority],
+                    [field]: value,
+                },
+            };
+
+            if (field === "days") {
+                let highDays = Number(updatedSettings.high.days);
+                let mediumDays = Number(updatedSettings.medium.days);
+
+                if (Number.isNaN(highDays) || highDays < 0) {
+                    highDays = 0;
+                    updatedSettings.high = {
+                        ...updatedSettings.high,
+                        days: 0,
+                    };
+                }
+
+                if (Number.isNaN(mediumDays)) {
+                    mediumDays = highDays + 1;
+                    updatedSettings.medium = {
+                        ...updatedSettings.medium,
+                        days: mediumDays,
+                    };
+                }
+
+                if (priority === "medium" && mediumDays <= highDays) {
+                    updatedSettings.high = {
+                        ...updatedSettings.high,
+                        days: Math.max(0, mediumDays - 1),
+                    };
+                }
+
+                if (priority === "high" && highDays >= mediumDays) {
+                    updatedSettings.medium = {
+                        ...updatedSettings.medium,
+                        days: highDays + 1,
+                    };
+                }
+            }
+
+            return updatedSettings;
+        });
     };
 
     const resetNotificationSettings = () => {
         setNotificationsEnabled(true);
-        setNotificationSettings({
-            high: { visible: true, colour: "#a1001d", days: 3 },
-            medium: { visible: true, colour: "#d99a00", days: 7 },
-            low: { visible: true, colour: "#00813d" },
-            none: { visible: true, colour: "#00813d" },
-        });
+        setNotificationSettings(defaultNotificationSettings);
+    };
+
+    const handleGeneralSettingChange = (field, value) => {
+        setGeneralSettings((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    const resetGeneralSettings = () => {
+        setGeneralSettings(defaultGeneralSettings);
+        setAutoFillEnabled(defaultGeneralSettings.autoFillEnabled);
+        setManualPortionFallback(false);
+    };
+
+    const resetAllSettings = () => {
+        setNotificationsEnabled(true);
+        setNotificationSettings(defaultNotificationSettings);
+        setGeneralSettings(defaultGeneralSettings);
+        setAutoFillEnabled(defaultGeneralSettings.autoFillEnabled);
+        setManualPortionFallback(false);
+        setShowResetAllPrompt(false);
     };
 
     const formatTotalAmount = (amount, unit) => {
@@ -415,6 +691,12 @@ function FoodDiary() {
         setNewItem((prev) => {
             const updatedItem = { ...prev, [name]: value };
 
+            if (name === "name" && value !== prev.name) {
+                updatedItem.brandName = "";
+                updatedItem.fatSecretFoodId = "";
+                setSelectedFatSecretFoodId(null);
+            }
+
             if ((name === "totalWeight" || name === "portionSize") && updatedItem.totalWeight && updatedItem.portionSize) {
                 const calculatedPortions = Number(updatedItem.totalWeight) / Number(updatedItem.portionSize);
                 updatedItem.portions = calculatedPortions.toFixed(1);
@@ -443,8 +725,8 @@ function FoodDiary() {
                 };
             }
 
-            if (autoFillEnabled && (name === "unit" || name === "totalWeight" || name === "name")) {
-                if (!updatedItem.name || !updatedItem.totalWeight || !updatedItem.unit) {
+            if (autoFillEnabled && (name === "unit" || name === "name")) {
+                if (!updatedItem.name || !updatedItem.unit) {
                     return {
                         ...updatedItem,
                         portionSize: "",
@@ -478,17 +760,31 @@ function FoodDiary() {
     };
 
     const toggleFoodDiarySort = (key) => {
-        setFoodDiarySort((prev) => ({
-            key,
-            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-        }));
+        setFoodDiarySort((prev) => {
+            if (prev.key !== key) {
+                return { key, direction: "asc" };
+            }
+
+            if (prev.direction === "asc") {
+                return { key, direction: "desc" };
+            }
+
+            return { key: null, direction: "asc" };
+        });
     };
 
     const toggleBreakdownSort = (key) => {
-        setBreakdownSort((prev) => ({
-            key,
-            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-        }));
+        setBreakdownSort((prev) => {
+            if (prev.key !== key) {
+                return { key, direction: "asc" };
+            }
+
+            if (prev.direction === "asc") {
+                return { key, direction: "desc" };
+            }
+
+            return { key: null, direction: "asc" };
+        });
     };
 
     const getSortIcon = (sortState, key) => {
@@ -509,9 +805,15 @@ function FoodDiary() {
     };
 
     const handleSubmit = () => {
+        const expiryDateToSave = newItem.expiryDate || getTodayDateString();
+
+        if (expiryDateToSave !== noExpiryDateValue && expiryDateToSave < getTodayDateString()) {
+            alert("Please enter a valid date");
+            return;
+        }
+
         if (
             !newItem.name ||
-            !newItem.expiryDate ||
             !newItem.totalWeight ||
             !newItem.unit ||
             !newItem.portionSize ||
@@ -534,7 +836,7 @@ function FoodDiary() {
 
         const itemToSave = {
             name: newItem.name,
-            expiryDate: newItem.expiryDate,
+            expiryDate: expiryDateToSave,
             calories: newItem.calories,
             portions: (Number(newItem.totalWeight) / Number(newItem.portionSize)).toString(),
             portionSize: newItem.portionSize,
@@ -654,12 +956,14 @@ function FoodDiary() {
         const itemExpiryDate = item.expiryDate ? item.expiryDate.slice(0, 10) : "";
         const itemCalories = item.calories?.toString() || "";
         const itemPortions = item.portions?.toString() || "";
+        const itemPriority = getExpiryStatusKey(item.expiryDate);
 
         return (
             itemName.includes(filters.name.toLowerCase()) &&
             itemExpiryDate.includes(filters.expiryDate) &&
             itemCalories.includes(filters.calories) &&
-            itemPortions.includes(filters.portions)
+            itemPortions.includes(filters.portions) &&
+            (!filters.priority || itemPriority === filters.priority)
         );
     });
 
@@ -671,6 +975,7 @@ function FoodDiary() {
             expiryDate: "date",
             calories: "number",
             portions: "number",
+            totalAmount: "number",
         };
 
         return sortValues(
@@ -704,44 +1009,18 @@ function FoodDiary() {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div className="foodDiary-container">
+        <div
+            className="foodDiary-container"
+            style={{
+                "--food-diary-primary-colour": generalSettings.primaryColour,
+                "--food-diary-heading-text-colour": generalSettings.headingTextColour,
+                "--food-diary-body-text-colour": generalSettings.bodyTextColour,
+                "--food-diary-background-colour": generalSettings.backgroundColour,
+                backgroundColor: generalSettings.backgroundColour,
+                color: generalSettings.bodyTextColour,
+            }}
+        >
             <div className="foodDiary-controls" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                <button className={`add-btn ${selectedItem ? "hidden-control-btn" : ""}`} onClick={() => {
-                    if (showForm) {
-                        cancelAddFood();
-                    } else {
-                        if (showFilters) {
-                            closeFilters();
-                        }
-
-                        setIsClosingForm(false);
-                        setShowForm(true);
-                        setMode(null);
-                        setEditingItem(null);
-                    }
-                }}>
-                    {showForm ? "Cancel" : "+ Add Food Item"}
-                </button>
-                <button className={`add-btn ${mode === 'delete' ? 'active-mode-delete' : ''}`} onClick={() =>
-                    toggleMode('delete')}>
-                    Delete
-                </button>
-                <button className="add-btn" onClick={() => {
-                    if (showFilters) {
-                        closeFilters();
-                    } else {
-                        if (showForm) {
-                            hideAddFoodImmediately();
-                        }
-
-                        setIsClosingFilters(false);
-                        setShowFilters(true);
-                        setMode(null);
-                        setEditingItem(null);
-                    }
-                }}>
-                    {showFilters ? "Hide Filters" : "Show Filters"}
-                </button>
                 <div className="settings-wrapper" ref={settingsWrapperRef}>
                     <button
                         className="settings-btn"
@@ -751,6 +1030,8 @@ function FoodDiary() {
                                 closeSettings();
                             } else {
                                 setIsClosingSettings(false);
+                                setShowNotificationSettings(false);
+                                setShowGeneralSettings(false);
                                 setShowSettings(true);
                             }
                         }}
@@ -760,15 +1041,72 @@ function FoodDiary() {
 
                     {showSettings && (
                         <div className={`settings-pane ${isClosingSettings ? "settings-pane-closing" : "settings-pane-opening"}`}>
-                            <h3>Settings</h3>
+                            {showNotificationSettings || showGeneralSettings ? (
+                                <button
+                                    type="button"
+                                    className="settings-back-btn"
+                                    onClick={() => {
+                                        setShowNotificationSettings(false);
+                                        setShowGeneralSettings(false);
+                                    }}
+                                >
+                                    Settings
+                                </button>
+                            ) : (
+                                <>
+                                    <h3>Settings</h3>
 
-                            <button
-                                type="button"
-                                className="settings-menu-btn"
-                                onClick={() => setShowNotificationSettings((prev) => !prev)}
-                            >
-                                Notification Settings
-                            </button>
+                                    <button
+                                        type="button"
+                                        className="settings-menu-btn"
+                                        onClick={() => {
+                                            setShowResetAllPrompt(false);
+                                            setShowNotificationSettings(true);
+                                        }}
+                                    >
+                                        Notification Settings
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="settings-menu-btn"
+                                        onClick={() => {
+                                            setShowResetAllPrompt(false);
+                                            setShowGeneralSettings(true);
+                                        }}
+                                    >
+                                        General Settings
+                                    </button>
+
+                                    {showResetAllPrompt ? (
+                                        <div className="reset-all-settings-prompt">
+                                            <span>Reset?</span>
+                                            <button
+                                                type="button"
+                                                className="reset-all-cancel-btn"
+                                                onClick={() => setShowResetAllPrompt(false)}
+                                            >
+                                                ✕
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="reset-all-confirm-btn"
+                                                onClick={resetAllSettings}
+                                            >
+                                                ✓
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="reset-all-settings-btn"
+                                            onClick={() => setShowResetAllPrompt(true)}
+                                        >
+                                            Reset All Settings
+                                        </button>
+                                    )}
+                                </>
+                            )}
 
                             {showNotificationSettings && (
                                 <div className="notification-settings-pane">
@@ -781,7 +1119,7 @@ function FoodDiary() {
                                         />
                                     </label>
                                     <div className="notification-setting-row">
-                                        <span>High</span>
+                                        <span>High Priority</span>
                                         <input
                                             type="checkbox"
                                             checked={notificationSettings.high.visible}
@@ -801,7 +1139,7 @@ function FoodDiary() {
                                     </div>
 
                                     <div className="notification-setting-row">
-                                        <span>Medium</span>
+                                        <span>Medium Priority</span>
                                         <input
                                             type="checkbox"
                                             checked={notificationSettings.medium.visible}
@@ -814,14 +1152,14 @@ function FoodDiary() {
                                         />
                                         <input
                                             type="number"
-                                            min="0"
+                                            min="1"
                                             value={notificationSettings.medium.days}
                                             onChange={(e) => handleNotificationSettingChange("medium", "days", e.target.value)}
                                         />
                                     </div>
 
                                     <div className="notification-setting-row">
-                                        <span>Low</span>
+                                        <span>Low Priority</span>
                                         <input
                                             type="checkbox"
                                             checked={notificationSettings.low.visible}
@@ -836,16 +1174,16 @@ function FoodDiary() {
                                     </div>
 
                                     <div className="notification-setting-row">
-                                        <span>None</span>
+                                        <span>No Expiry</span>
                                         <input
                                             type="checkbox"
-                                            checked={notificationSettings.none.visible}
-                                            onChange={(e) => handleNotificationSettingChange("none", "visible", e.target.checked)}
+                                            checked={notificationSettings.noExpiry.visible}
+                                            onChange={(e) => handleNotificationSettingChange("noExpiry", "visible", e.target.checked)}
                                         />
                                         <input
                                             type="color"
-                                            value={notificationSettings.none.colour}
-                                            onChange={(e) => handleNotificationSettingChange("none", "colour", e.target.value)}
+                                            value={notificationSettings.noExpiry.colour}
+                                            onChange={(e) => handleNotificationSettingChange("noExpiry", "colour", e.target.value)}
                                         />
                                         <div className="notification-days-placeholder"></div>
                                     </div>
@@ -858,23 +1196,110 @@ function FoodDiary() {
                                     </button>
                                 </div>
                             )}
+
+                            {showGeneralSettings && (
+                                <div className="general-settings-pane">
+                                    <div className="general-setting-row">
+                                        <span>Primary Colour</span>
+                                        <input
+                                            type="color"
+                                            value={generalSettings.primaryColour}
+                                            onChange={(e) => handleGeneralSettingChange("primaryColour", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="general-setting-row">
+                                        <span>Heading Text</span>
+                                        <input
+                                            type="color"
+                                            value={generalSettings.headingTextColour}
+                                            onChange={(e) => handleGeneralSettingChange("headingTextColour", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="general-setting-row">
+                                        <span>Body Text</span>
+                                        <input
+                                            type="color"
+                                            value={generalSettings.bodyTextColour}
+                                            onChange={(e) => handleGeneralSettingChange("bodyTextColour", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="general-setting-row">
+                                        <span>Background</span>
+                                        <input
+                                            type="color"
+                                            value={generalSettings.backgroundColour}
+                                            onChange={(e) => handleGeneralSettingChange("backgroundColour", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <label className="general-setting-row general-toggle-row">
+                                        <span>AutoFill</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={generalSettings.autoFillEnabled}
+                                            onChange={(e) => handleGeneralSettingChange("autoFillEnabled", e.target.checked)}
+                                        />
+                                    </label>
+
+                                    <button
+                                        type="button"
+                                        className="reset-general-settings-btn"
+                                        onClick={resetGeneralSettings}
+                                    >
+                                        Reset General Settings
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
             <div className="food-form-slot">
                 {showForm && (
-                    <div className={`food-form ${isClosingForm ? "food-form-closing" : "food-form-opening"}`}>
-                        <label className="food-form-field">
+                    <div className={`food-form ${shouldShowFatSecretResults ? "food-form-results-open" : ""} ${isClosingForm ? "food-form-closing" : "food-form-opening"}`}>
+                        <label
+                            className="food-form-field food-name-field"
+                            onFocus={() => setIsFoodNameFocused(true)}
+                            onBlur={() => {
+                                setTimeout(() => {
+                                    setIsFoodNameFocused(false);
+                                }, 150);
+                            }}
+                        >
                             <span>Food Name</span>
                             <input name="name" placeholder="Food Name" onChange={handleChange} value={newItem.name} />
+                            <input type="hidden" name="brandName" value={newItem.brandName} readOnly />
+                            <input type="hidden" name="fatSecretFoodId" value={newItem.fatSecretFoodId} readOnly />
+
+                            {shouldShowFatSecretResults && (
+                                <div className="fatsecret-results-list">
+                                    {fatSecretResults.map((result) => (
+                                        <button
+                                            type="button"
+                                            key={result.foodId}
+                                            className={`fatsecret-result ${
+                                                String(result.foodId) === String(selectedFatSecretFoodId)
+                                                    ? "fatsecret-result-selected"
+                                                    : ""
+                                            }`}
+                                            onClick={() => selectFatSecretResult(result)}
+                                        >
+                                            <span>{result.foodName}</span>
+                                            {result.brandName && <small>{result.brandName}</small>}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </label>
 
                         <label className="food-form-field">
                             <span>Expiry Date</span>
                             <div className="expiry-input-row">
                                 {newItem.expiryDate === noExpiryDateValue ? (
-                                    <input value="No Expiry" type="text" readOnly onClick={clearNewItemNoExpiry} />
+                                    <input value="NoExpiry" type="text" readOnly onClick={clearNewItemNoExpiry} />
                                 ) : (
                                     <input name="expiryDate" onChange={handleChange} value={newItem.expiryDate} type="date" />
                                 )}
@@ -914,7 +1339,7 @@ function FoodDiary() {
                             <span>Portion Size</span>
                             {autoFillEnabled && !manualPortionFallback ? (
                                 <div className="auto-filled-display">
-                                    {!newItem.name || !newItem.totalWeight
+                                    {!newItem.name
                                         ? "-"
                                         : calorieLoading
                                             ? "Calculating..."
@@ -939,7 +1364,7 @@ function FoodDiary() {
                             <span>Calories Per Portion</span>
                             {autoFillEnabled && !manualPortionFallback ? (
                                 <div className="auto-filled-display">
-                                    {!newItem.name || !newItem.totalWeight
+                                    {!newItem.name
                                         ? "-"
                                         : calorieLoading
                                             ? "Calculating..."
@@ -960,11 +1385,13 @@ function FoodDiary() {
                                 />
                             )}
                         </label>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setAutoFillEnabled((prev) => {
-                                    const nextValue = !prev;
+                        {generalSettings.autoFillEnabled && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const nextValue = !autoFillEnabled;
+
+                                    setAutoFillEnabled(nextValue);
 
                                     if (!nextValue) {
                                         setManualPortionFallback(true);
@@ -977,13 +1404,11 @@ function FoodDiary() {
                                     } else {
                                         setManualPortionFallback(false);
                                     }
-
-                                    return nextValue;
-                                });
-                            }}
-                        >
-                            {autoFillEnabled ? "Turn Off Auto Fill" : "Turn On Auto Fill"}
-                        </button>
+                                }}
+                            >
+                                {autoFillEnabled ? "Turn Off Auto Fill" : "Turn On Auto Fill"}
+                            </button>
+                        )}
                         <button onClick={handleSubmit}>Save</button>
                     </div>
                 )}
@@ -996,16 +1421,6 @@ function FoodDiary() {
                                 name="name"
                                 placeholder="Filter by food name"
                                 value={filters.name}
-                                onChange={handleFilterChange}
-                            />
-                        </label>
-
-                        <label className="food-form-field">
-                            <span>Expiry Date</span>
-                            <input
-                                name="expiryDate"
-                                type="date"
-                                value={filters.expiryDate}
                                 onChange={handleFilterChange}
                             />
                         </label>
@@ -1032,8 +1447,79 @@ function FoodDiary() {
                             />
                         </label>
 
-                        <button onClick={() => setFilters({ name: "", expiryDate: "", calories: "", portions: "" })}>
-                            Clear Filters
+                        <label className="food-form-field expiry-filter-field">
+                            <span>Expiry Date</span>
+                            <div className="expiry-filter-content">
+                                <input
+                                    name="expiryDate"
+                                    type="date"
+                                    value={filters.expiryDate}
+                                    onChange={handleFilterChange}
+                                />
+
+                                <div className="priority-key-row">
+                                    <button
+                                        type="button"
+                                        className={`priority-key-item ${filters.priority === "high" ? "priority-key-item-active" : ""}`}
+                                        onClick={() => setFilters((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === "high" ? "" : "high",
+                                        }))}
+                                    >
+                                        <span className="priority-key-colour"
+                                              style={{ backgroundColor: notificationSettings.high.colour }}>
+                                        </span>
+                                        High
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`priority-key-item ${filters.priority === "medium" ? "priority-key-item-active" : ""}`}
+                                        onClick={() => setFilters((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === "medium" ? "" : "medium",
+                                        }))}
+                                    >
+                                        <span
+                                            className="priority-key-colour"
+                                            style={{ backgroundColor: notificationSettings.medium.colour }}
+                                        ></span>
+                                        Medium
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`priority-key-item ${filters.priority === "low" ? "priority-key-item-active" : ""}`}
+                                        onClick={() => setFilters((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === "low" ? "" : "low",
+                                        }))}
+                                    >
+                                        <span
+                                            className="priority-key-colour"
+                                            style={{ backgroundColor: notificationSettings.low.colour }}
+                                        ></span>
+                                        Low
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`priority-key-item ${filters.priority === "noExpiry" ? "priority-key-item-active" : ""}`}
+                                        onClick={() => setFilters((prev) => ({
+                                            ...prev,
+                                            priority: prev.priority === "noExpiry" ? "" : "noExpiry",
+                                        }))}
+                                    >
+                                        <span
+                                            className="priority-key-colour"
+                                            style={{ backgroundColor: notificationSettings.noExpiry.colour }}
+                                        ></span>
+                                        No Expiry
+                                    </button>
+                                </div>
+                            </div>
+                        </label>
+
+                        <button onClick={() => setFilters({ name: "", expiryDate: "", calories: "",
+                            portions: "", priority: "" })}>
+                            Clear
                         </button>
                     </div>
                 )}
@@ -1084,7 +1570,7 @@ function FoodDiary() {
                                                 <td>
                                                     <div className="expiry-input-row table-expiry-input-row">
                                                         {editingItem.expiryDate?.slice(0, 10) === noExpiryDateValue ? (
-                                                            <input value="No Expiry" type="text" readOnly required onClick={clearEditingItemNoExpiry} />
+                                                            <input value="NoExpiry" type="text" readOnly required onClick={clearEditingItemNoExpiry} />
                                                         ) : (
                                                             <input name="expiryDate" type="date" onChange={handleEditChange} value={editingItem.expiryDate?.slice(0, 10)} required />
                                                         )}
@@ -1221,7 +1707,30 @@ function FoodDiary() {
                 </div>
             ) : (
                 //homepage table
-                <div className="panel">
+                <div className="panel food-diary-panel-with-side-add">
+                    <div className="side-table-button-column">
+                        <button className="side-add-food-btn" onClick={() => {
+                            if (showForm) {
+                                cancelAddFood();
+                            } else {
+                                if (showFilters) {
+                                    closeFilters();
+                                }
+                                setIsClosingForm(false);
+                                setShowForm(true);
+                                setMode(null);
+                                setEditingItem(null);
+                            }
+                        }}>
+                            {showForm ? "×" : "+"}
+                        </button>
+                        <button
+                            className={`side-delete-btn ${mode === 'delete' ? 'active-mode-delete' : ''}`}
+                            onClick={() => toggleMode('delete')}
+                        >
+                            Bin
+                        </button>
+                    </div>
 
                     <div className="table-scroll">
                         <table className="food_diary-table">
@@ -1236,8 +1745,8 @@ function FoodDiary() {
                                 <th className="sortable-heading" onClick={() => toggleFoodDiarySort("portions")}>
                                     Portions <span className="sort-icon">{getSortIcon(foodDiarySort, "portions")}</span>
                                 </th>
-                                <th>
-                                    Total Amount
+                                <th className="sortable-heading" onClick={() => toggleFoodDiarySort("totalAmount")}>
+                                    Total Amount <span className="sort-icon">{getSortIcon(foodDiarySort, "totalAmount")}</span>
                                 </th>
                                 <th className="sortable-heading" onClick={() => toggleFoodDiarySort("expiryDate")}>
                                     Expiry Date <span className="sort-icon">{getSortIcon(foodDiarySort, "expiryDate")}</span>
@@ -1269,7 +1778,21 @@ function FoodDiary() {
                             </tbody>
                         </table>
                     </div>
-
+                    <button className="side-filter-btn" onClick={() => {
+                        if (showFilters) {
+                            closeFilters();
+                        } else {
+                            if (showForm) {
+                                hideAddFoodImmediately();
+                            }
+                            setIsClosingFilters(false);
+                            setShowFilters(true);
+                            setMode(null);
+                            setEditingItem(null);
+                        }
+                    }}>
+                        {showFilters ? "Hide" : "Filter"}
+                    </button>
                 </div>
 
             )

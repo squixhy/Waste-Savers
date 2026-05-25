@@ -34,15 +34,15 @@
 }
 
 .panel h3 {
-    color: #3f6652;
+    color: var(--food-diary-primary-colour, #3f6652);
     margin-bottom: 1.2vh;
 }
 
 .panel button {
     margin-top: 1.2vh;
     padding: 0.8vh 1vw;
-    background: #3f6652;
-    color: #fff;
+    background: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
     border: none;
     border-radius: 0.5vw;
     cursor: pointer;
@@ -82,7 +82,7 @@
 
 .food-diary-title {
     font-size: 1.5rem;
-    color: #3f6652;
+    color: var(--food-diary-primary-colour, #3f6652);
     margin-bottom: 1.6vh;
 }
 
@@ -96,8 +96,8 @@
 }
 
 .food_diary-table th {
-    background-color: #3f6652;
-    color: #fff;
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
     padding: 1.2vh 1vw;
     font-weight: 600;
     position: sticky;
@@ -108,7 +108,7 @@
 .food_diary-table td {
     padding: 1.1vh 1vw;
     border-bottom: 0.1vh solid #e8ede9;
-    color: #333;
+    color: var(--food-diary-body-text-colour, #333);
 }
 
 .food_diary-table tbody tr:nth-child(even) {
@@ -118,6 +118,10 @@
 .food_diary-table tbody tr:hover {
     background-color: #e4ede7;
     transition: background 0.2s ease;
+}
+
+.food_diary-table tbody tr:hover td {
+    color: var(--food-diary-body-text-colour, #333);
 }
 
 .sort-icon {
@@ -141,6 +145,8 @@
 .table-scroll {
     max-height: 55vh;
     overflow-y: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .edit-food-name-row {
@@ -154,7 +160,7 @@
     gap: 0.4vh;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #3f6652;
+    color: var(--food-diary-primary-colour, #3f6652);
 }
 
 .edit-food-name-row input {
@@ -214,7 +220,7 @@
     gap: 0.4vh;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #3f6652;
+    color: var(--food-diary-primary-colour, #3f6652);
 }
 
 .food-form-field input,
@@ -257,6 +263,8 @@
     max-height: 10vh;
     overflow: visible;
     transform-origin: bottom;
+    position: relative;
+    z-index: 110;
 }
 
 .food-form-slot {
@@ -266,6 +274,7 @@
     align-items: flex-end;
     justify-content: center;
     position: relative;
+    z-index: 100;
 }
 
 .filter-form.food-form-opening {
@@ -503,11 +512,12 @@
     justify-content: center;
 }
 
-.filter-form .food-form-field,
-.filter-form .food-form-field:nth-of-type(4),
-.filter-form .food-form-field:nth-of-type(5),
-.filter-form .food-form-field:nth-of-type(6) {
-    flex: 1 1 0;
+.filter-form .food-form-field {
+    flex: 0 0 14vw;
+}
+
+.filter-form .expiry-filter-field {
+    flex: 0 0 21vw;
 }
 
 .breakdown-panel {
@@ -559,6 +569,7 @@
     margin-left: auto;
     padding-right: 1vw;
     padding-top: 1vh;
+    z-index: 1000;
 }
 
 .settings-btn {
@@ -571,6 +582,8 @@
     color: #fff;
     cursor: pointer;
     font-size: 0.75rem;
+    position: relative;
+    z-index: 10000;
 }
 
 .settings-btn:hover {
@@ -591,7 +604,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    z-index: 50;
+    z-index: 9999;
     overflow-y: auto;
     transform-origin: top right;
     min-height: 10vh;
@@ -714,4 +727,332 @@
 
 .reset-notification-settings-btn:hover {
     background-color: #c00025;
+}
+
+.settings-back-btn {
+    height: 3vh;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: transparent;
+    color: #3f6652;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.settings-back-btn:hover {
+    text-decoration: underline;
+}
+
+.foodDiary-container .add-btn,
+.foodDiary-container .settings-btn,
+.foodDiary-container .settings-menu-btn {
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
+}
+
+.foodDiary-container .settings-btn:hover,
+.foodDiary-container .settings-menu-btn:hover {
+    opacity: 0.85;
+}
+
+.foodDiary-container .food-form,
+.foodDiary-container .panel {
+    color: var(--food-diary-body-text-colour, #000);
+}
+
+
+.general-settings-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vh;
+    width: 100%;
+}
+
+.general-setting-row {
+    display: grid;
+    grid-template-columns: 8vw 4vw;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6vw;
+    font-size: 0.75rem;
+}
+
+.general-setting-row input[type="color"] {
+    width: 3vw;
+    height: 2.5vh;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.general-setting-row input[type="checkbox"] {
+    width: 1vw;
+    height: 1vw;
+    cursor: pointer;
+    justify-self: center;
+}
+
+.general-toggle-row {
+    cursor: pointer;
+}
+
+.reset-general-settings-btn {
+    height: 3vh;
+    margin-top: 0.6vh;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: #a1001d;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.reset-general-settings-btn:hover {
+    background-color: #c00025;
+}
+.reset-all-settings-btn {
+    height: 3vh;
+    margin-top: 0.6vh;
+    border: none;
+    border-radius: 0.4vw;
+    background-color: #a1001d;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.reset-all-settings-btn:hover {
+    background-color: #c00025;
+}
+
+.reset-all-settings-prompt {
+    display: grid;
+    grid-template-columns: 1fr 2vw 2vw;
+    align-items: center;
+    gap: 0.4vw;
+    margin-top: 0.6vh;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #3f6652;
+}
+
+.reset-all-settings-prompt button {
+    height: 2.6vh;
+    border: none;
+    border-radius: 0.4vw;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.reset-all-cancel-btn {
+    background-color: #a1001d;
+}
+
+.reset-all-confirm-btn {
+    background-color: #00813d;
+}
+
+.reset-all-cancel-btn:hover,
+.reset-all-confirm-btn:hover {
+    opacity: 0.85;
+}
+
+.food-name-field {
+    position: relative;
+}
+
+.fatsecret-results-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    min-height: 3.4vh;
+    max-height: 18vh;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 0.1vh solid #cdd8d0;
+    border-radius: 0.4vw;
+    box-shadow: 0 0.4vh 0.9vw rgba(0, 0, 0, 0.12);
+    z-index: 200;
+}
+
+.fatsecret-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2vh;
+    width: 100%;
+    padding: 0.6vh 0.6vw;
+    color: #000;
+    background-color: #fff;
+    border: none;
+    border-bottom: 0.1vh solid #e8ede9;
+    font-size: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.fatsecret-result:hover {
+    background-color: #e4ede7;
+}
+
+.fatsecret-result small {
+    font-size: 0.65rem;
+    color: #555;
+}
+
+.fatsecret-result-selected,
+.fatsecret-result-selected:hover {
+    background-color: #e4ede7;
+    color: #000;
+    font-weight: 700;
+}
+
+.fatsecret-result-selected small {
+    color: #555;
+}
+
+.selected-brand-label {
+    margin-top: 0.2vh;
+    font-size: 0.65rem;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.expiry-filter-field {
+    min-width: 21vw;
+}
+
+.expiry-filter-content {
+    display: grid;
+    grid-template-columns: 14vw 7vw;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+.expiry-filter-content input[type="date"] {
+    width: 14vw;
+    min-width: 14vw;
+    max-width: 14vw;
+}
+
+.priority-key-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.2vh 0.3vw;
+    width: 7vw;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--food-diary-primary-colour, #3f6652);
+    white-space: nowrap;
+}
+
+.priority-key-item {
+    display: flex;
+    align-items: center;
+    gap: 0.2vw;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--food-diary-primary-colour, #3f6652);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.priority-key-item:hover,
+.priority-key-item-active {
+    text-decoration: underline;
+}
+
+.priority-key-colour {
+    display: inline-block;
+    width: 0.55vw;
+    height: 0.55vw;
+    border-radius: 0.15vw;
+    border: 0.05vh solid #cdd8d0;
+    flex-shrink: 0;
+}
+
+.food-diary-panel-with-side-add {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5vw;
+}
+
+.food-diary-panel-with-side-add .table-scroll {
+    flex: 1;
+}
+
+.side-add-food-btn {
+    width: 3.2vw;
+    height: 4.2vh;
+    min-width: 3.2vw;
+    min-height: 4.2vh;
+    border: none;
+    border-radius: 0.7vw;
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.side-add-food-btn:hover {
+    opacity: 0.9;
+}
+
+.side-filter-btn {
+    width: 3.2vw;
+    height: 4.2vh;
+    min-width: 3.2vw;
+    min-height: 4.2vh;
+    border: none;
+    border-radius: 0.7vw;
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.side-filter-btn:hover {
+    opacity: 0.9;
+}
+
+.side-table-button-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+    flex-shrink: 0;
+}
+
+.side-delete-btn {
+    width: 3.2vw;
+    height: 4.2vh;
+    min-width: 3.2vw;
+    min-height: 4.2vh;
+    border: none;
+    border-radius: 0.7vw;
+    background-color: var(--food-diary-primary-colour, #3f6652);
+    color: var(--food-diary-heading-text-colour, #fff);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.side-delete-btn:hover {
+    opacity: 0.9;
 }
