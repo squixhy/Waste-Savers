@@ -88,10 +88,10 @@
 
 .food_diary-table {
     width: 65vw;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-family: "Inter", sans-serif;
     font-size: 0.95rem;
-    max-height: 50vh;
     text-align: center;
 }
 
@@ -102,7 +102,7 @@
     font-weight: 600;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 20;
 }
 
 .food_diary-table td {
@@ -143,8 +143,9 @@
 }
 
 .table-scroll {
-    max-height: 55vh;
+    max-height: 40vh;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     z-index: 1;
 }

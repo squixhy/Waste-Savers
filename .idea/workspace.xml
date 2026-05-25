@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="833573c4-950b-471e-85e8-ae80421c8d70" name="Changes" comment="Noti settings">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/FoodDiary.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/pages_css/FoodDiary.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,7 +86,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "feature/food-diary",
+    "git-widget-placeholder": "main",
     "git.auto.fetch.suggestion.counter": "1",
     "javascript.preferred.runtime.type.id": "node",
     "last_opened_file_path": "/Users/tobydason-barber/WebstormProjects/Waste-Savers",
@@ -249,7 +248,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779465542057</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Small css changes, added filter btn to breakdown page">
+      <option name="closed" value="true" />
+      <created>1779733330896</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1779733330896</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -275,7 +282,8 @@
     <MESSAGE value="Added more inspection tools" />
     <MESSAGE value="Added sorting and filter" />
     <MESSAGE value="Noti settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="Noti settings" />
+    <MESSAGE value="Small css changes, added filter btn to breakdown page" />
+    <option name="LAST_COMMIT_MESSAGE" value="Small css changes, added filter btn to breakdown page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
